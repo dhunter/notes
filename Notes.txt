@@ -166,9 +166,11 @@
 				- Choose different css selectors based on:
 					- Media types, (print, screen, speech) and/or
 					- Media features, (height, width, orientation, resolution)
+				- Very useful for fine-tuning individual bits of design
+					- i.e. use Bootstrap for broad-brush design bits
+						- Then add in media queries, where desired, to finish off
 				- Encase css selectors within query specifying situation they should apply to
 					- i.e. @media screen (min-width: 900px) { [css selectors] }
-				- Should start from mobile / smallest screen first
 				- If you model css selector classes identically - i.e.:
 					- @media screen (min-width: 600px) {
   					- /* For tablets: */
@@ -199,8 +201,6 @@
 					- @media screen (min-width: 900) {h1 {color: blue;}}
 					- If width < 900, h1's will be red.
 					- If width >= 900, h1's will be blue.
-
-					
 	- Accessibility
 		- aria-hidden="true"
 			- Hides content from assistive technology, (i.e. screen reader) for this and all children elements
