@@ -3,7 +3,7 @@
 		- The Complete 2020 Web Development Bootcamp, (https://www.udemy.com/course/the-complete-web-development-bootcamp/)
 			- Course Resources List
 				- https://www.appbrewery.co/p/web-development-course-resources/
-	- CSS elements with multiple measurments on one line
+	- CSS elements with multiple measurements on one line
 		- The numbers start on the top and go clockwise around the item	
 		- {border: 0px 10px 20px 30px;} would have a:
 			- 0px border on top
@@ -91,7 +91,7 @@
 			- Purple
 				- Royalty, Wealth, Femininity
 			- Combining Colors to make Color Palettes
-				- Analagous Colors, (2 colors)
+				- Analogous Colors, (2 colors)
 					- Selecting adjacent colors on the color wheel
 					- Harmonious, Easy to look at for long periods.
 					- Good for primary interface
