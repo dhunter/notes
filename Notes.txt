@@ -1,0 +1,207 @@
+- Web Design
+	- Credits
+		- The Complete 2020 Web Development Bootcamp, (https://www.udemy.com/course/the-complete-web-development-bootcamp/)
+			- Course Resources List
+				- https://www.appbrewery.co/p/web-development-course-resources/
+	- CSS elements with multiple measurments on one line
+		- The numbers start on the top and go clockwise around the item	
+		- {border: 0px 10px 20px 30px;} would have a:
+			- 0px border on top
+				- (0 doesn't require a measurement type, but can still use)
+			- 10px border on the right side
+			- 20px border on the bottom
+			- 30px border on the left side
+		- Shorthand options
+			- {border: 0px 10px 20px;}
+				- 0px on top
+				- 10px on left and right
+				- 20px on bottom
+			- {border: 0px 10px;}
+				- 0px border on top and bottom
+				- 10px border on left and right
+			- {border: 0px;}
+				- 0px border on all four sides
+	- Displaying Elements
+		- display: block --> nothing else on the same line, but can set width/height
+		- display: inline --> anything can appear on same line, but can't set width/height
+		- display: inline-block --> combination of prior two
+			- Can appear on same line and also can set width/height
+		- Hiding Elements
+			- (for quizzes, etc)
+			- display: none --> removes both the element and its position in the document
+				- As if you just deleted the element entirely in the page source
+			- visibility: hidden --> removes the element, but keeps its position
+				- i.e. you'll see a hole where the element should have been displayed
+	- Positioning
+		- float: [left/right/etc]
+			- Text that was below will now surround the targeted tag
+		- position: static - (default) - positioned according to the normal flow of document
+		- position: relative
+			- Setting top, right, bottom or left properties will move the item relative to its normal, (position: static) position
+		- position: fixed
+			- Holds position relative to viewport
+			- Does not move with scrolling
+			- (Can use for menu bar, etc)
+		- position: absolute
+			- Setting top, right, bottom or left properties will move the item relative to its parent element's position, (including <body>, if no other parents)
+			- Moves with scrolling.
+		- position: sticky
+			- position: relative until it's original position is reached in the document, then swaps to position: fixed
+			- (A somewhat more elegant menu bar, etc, if {top: 0;})
+		- z-index
+			- Only works on items where all items in question have position <> static
+				- (Items to go behind need position: absolute/fixed/sticky)
+			- Determines 3D display order, (default: 0)
+			- Lower values appear behind higher ones
+				- If z-indexes are equal, items coming first in the html code will be displayed behind items that come after
+					- i.e. if you have 3 divs with equal z-indexes, listed one after another in an html file:
+						- Div 1 will be displayed at the back
+						- Div 2 will be displayed in the middle
+						- Div 3 will be displayed in the front
+	- Fonts
+		- Embedding
+			- In header:
+				- <link href="https://fonts.googleapis.com/css?=family[name of family1]|[name of family2]|[name of family3]" rel="stylesheet">
+		- Sizing
+			- 16px, (fixed size) = 100%, (scaling) = 1em, (scaling) = 1rem, (scaling)
+				- To convert fixed font size to scaling, divide by 16 = Xem/Xrem
+			- Note: scaling inherits from all parent elements
+				- So, if <body> is 2em and <h1> is 3em, final size = 6em
+				- Unless you use "rem," which ignores all parent settings
+					- So, in above, if <h1> is 3rem, (instead of 3em), final size = 3em
+	- Designer vs Non-Designer Thinking
+		- https://www.udemy.com/course/the-complete-web-development-bootcamp/learn/lecture/12399734#content
+		- Color Theory
+			- Different shades have different "moods"
+				- i.e. Elicit different reactions in people seeing them
+					- Many of those reactions are common
+				- Good exercise is to analyze (especially print) ads to see how they use color to evoke desired reactions
+			- Red
+				- Love, Energy, Intensity
+				- Generates excitement
+			- Yellow
+				- Joy, Intellect, Attention
+				- Too much yellow can generate attention fatigue
+			- Green
+				- Freshness, Safety, Growth
+				- (Often used for food ads)
+			- Blue
+				- Stability, Trust, Serenity
+				- (medical/medicine/health)
+			- Purple
+				- Royalty, Wealth, Femininity
+			- Combining Colors to make Color Palettes
+				- Analagous Colors, (2 colors)
+					- Selecting adjacent colors on the color wheel
+					- Harmonious, Easy to look at for long periods.
+					- Good for primary interface
+				- Complimentary Colors, (2 colors)
+					- Selecting diametrically-opposed colors on the color wheel
+					- Attention-grabbing, but hard to look at for long periods.
+					- Bad choice for primary interface.
+				- Split Colors, (3 colors)
+					- Way of toning down disharmony of Complimentary
+					- Instead of picking complimentary color, instead the pick two colors surrounding the complimentary color.
+					- Still attention-grabbing, but not as clashy
+				- Triadic Colors, (3 colors)
+					- Selecting 3 colors equidistant around color wheel
+				- Monochromatic, (2 colors)
+					- Adding darker or lighter second color in the same family
+		- Typography
+			- 2 different fonts are good, 3 is pushing it, 4+ is bad
+			- Keep moods and time eras consistent
+				- i.e. Don't mix Roaring 20's-ish font with Renaissance-ish font
+			- Contrast serif-ness, (serif vs sans-serif) and font weights
+		- UI Design
+			- Function comes before form in all cases
+			- Ingrained visual impulses
+				- Eyes automatically go to biggest, boldest, brightest thing first
+				- Then round things
+				- Then smaller things
+				- Then lighter-shaded things
+			- Think of application as a journey
+				- Title > Sub-title > Larger images > Smaller images > Some text
+			- Minimize number of alignment lines, (horizontal & vertical)
+				- More alignment lines are perceived as "messy"
+			- Should work to provide conscious and subconscious queues
+				- Use 3D lighting effects to make elements seem more like real world
+					- Light should always come from above			
+					- i.e. To improve clickthrough on clickable button
+						- Unpressed state - slight shadow on bottom
+						- Pressed state - no shadow
+			- Start in monochrome
+				- Focus on spacing / positioning, etc
+				- To avoid getting distracted by colors
+				- Then add a single pop of color
+					- And build up color from there
+			- Make sure text over images stands out / is easily readable
+				- Especially where image will change
+					- If image will always be static, can just mod text color
+					- Make sure and test in front of a whole slew of images
+				- Colored overlay above image
+					- Can look a bit ugly
+						- Reducing opacity can help
+							- Gaussian blur has similar effect
+	- Responsive Design
+		- Page design changes based on viewport / screen size used, (i.e. laptop vs ipad vs phone)
+			- Bootstrap, (https://getbootstrap.com/)
+				- There are other front-end frameworks that perform similar tasks
+					- (Bootstrap provides additional CSS functionality beyond just responsive design)
+				- Navbar, (requires Javascript)
+					- Navbar expands / contracts into hamburger menu
+				- Grid System
+					- Horizontal content broken into 12ths
+						- i.e. to display 4 items per line for laptops, 3 per line for ipads and 2 per line for phones
+							- Define outer div set to class="row"
+								- Actual content class="[below code]"
+									- col-xl-3 - 4 items per line, (12/3) for full screen desktops, (xl)
+									- col-lg-4 - 3 items per line, (12/4) for full screen laptops, (lg) presuming resolution is less than desktops
+									- col-md-6 - 2 items per line, (12/6) for ipads / windowed content, (md) on desktops/laptops
+									- col-sm-12 - 1 item per line, (12/12) for phones, (sm)
+									- Note: content class has to include space-separated codes for all scenarios desired
+										- i.e. to be fully responsive, class="col-xl-3 col-lg-4 col-md-6 col-sm12"
+											- If fewer scenarios specified, will only change display where specified
+												- i.e. if only use "col-md-6" by itself, every viewport from medium up in size, (md, lg, xl) will show 2 per line, and below medium, (sm) will show 1 per line.
+			- Media Queries
+				- Choose different css selectors based on:
+					- Media types, (print, screen, speech) and/or
+					- Media features, (height, width, orientation, resolution)
+				- Encase css selectors within query specifying situation they should apply to
+					- i.e. @media screen (min-width: 900px) { [css selectors] }
+				- Should start from mobile / smallest screen first
+				- If you model css selector classes identically - i.e.:
+					- @media screen (min-width: 600px) {
+  					- /* For tablets: */
+					- .col-s-1 {width: 8.33%;}
+					- .col-s-2 {width: 16.66%;}
+					- .col-s-3 {width: 25%;}
+					- ...
+					- .col-s-12 {width: 100%;}
+					- }
+					- 
+					- @media screen (min-width: 768px) {
+					- /* For desktop: */
+					- .col-1 {width: 8.33%;}
+					- .col-2 {width: 16.66%;}
+					- .col-3 {width: 25%;}
+					- ...
+					- .col-12 {width: 100%;}
+					- }
+					-
+					- You can then call them exactly as with Bootstrap in html - i.e.:
+						- <div class="row">
+							<div class="col-3 col-s-3">...</div>
+							<div class="col-6 col-s-9">...</div>
+							<div class="col-3 col-s-12">...</div>
+						- </div>
+				- Note: css selectors inside media queries override css selectors outside - i.e.:
+					- h1 {color: red;}
+					- @media screen (min-width: 900) {h1 {color: blue;}}
+					- If width < 900, h1's will be red.
+					- If width >= 900, h1's will be blue.
+
+					
+	- Accessibility
+		- aria-hidden="true"
+			- Hides content from assistive technology, (i.e. screen reader) for this and all children elements
+				- (for use with buttons, etc)
