@@ -205,3 +205,25 @@
 		- aria-hidden="true"
 			- Hides content from assistive technology, (i.e. screen reader) for this and all children elements
 				- (for use with buttons, etc)
+	- Javascript, (JS)
+		- Good source for idiomatic js code -> https://github.com/rwaldron/idiomatic.js/
+		- Document Object Model, (DOM)
+			- Tree diagram of html code
+			- Selecting items, (most common method)
+				- document.querySelector("[element]") -> Individual Item
+					- If multiples, will only return first one found
+				- document.querySelectorAll("[element]") -> Array of all matching
+				- [element] uses exact same selectors as CSS
+					- i.e. "h1", "p.[class name]", "li a"
+			- Modifying items
+				- (Uses same properties as CSS, but camelCased instead of hyphenated)
+					- (i.e. instead of "font-size," (CSS) it would be "fontSize," (JS))
+				- For styles, best is to use ".classList.toggle[[class name]];"
+					- (or ".classList.add[[class name]];"/".classList.remove[[class name]];")
+					- Toggles adding/removing class selectors that exist in CSS file to items
+						- (akin to how Bootstrap works)
+							- i.e. add/remove a class of "invisible" or "big" or whatever
+					- Lets you keep all styling in CSS file and only use JS for behavior.
+				- For actual attributes, (i.e. "href=" in an anchor tag):
+					- .getAttribute([attribute name])
+					- .setAttribute([attribute name], [new value])
