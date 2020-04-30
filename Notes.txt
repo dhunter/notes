@@ -227,3 +227,59 @@
 				- For actual attributes, (i.e. "href=" in an anchor tag):
 					- .getAttribute([attribute name])
 					- .setAttribute([attribute name], [new value])
+		- Event Listeners
+			- When using a named function as the callback function of an event listener
+				- (i.e. the function that's supposed to be called once the specified event is detected)
+				- Use the function name without parenthesis, or the event will trigger on page load, rather than only when the specified event occurs, i.e.:
+					- ".addEventListener('click', handle_click());" -> Triggers on page load, rather than on click, as intended.
+					- ".addEventListener('click', handle_click);" -> Triggers on click, as intended.
+				- Thus, if you want to actually send back the event object that triggered the callback, you have to use an anonymous, (i.e. not named) function.
+					- i.e. ".addEventListener("keydown", function(event) {}"
+						- Since you can't do ".addEventListener("keydown", handle_click(event));"
+							- And still have it respond only to the event and not page load.
+		- Constructor Functions
+			- First letter of the function name has to be capitalized, i.e.
+				- function Person ([name], [age], [height],...) {
+				- 	this.name = name;
+				- 	this.age = age;
+				- 	this.height = height;
+				- 	...
+				- }
+			- When using, have to use "new" keyword before any values passed, i.e.
+				- person_1 = new Person ([name_1], [age_1], [height_1],...);
+				- person_2 = new Person ([name_2], [age_2], [height_2],...);
+			- To add methods, use anonymous functions, (i.e. functions without names)
+				- i.e. in above Person definition, add:
+					- this.[method_name] = function() {[function definition]}
+				- To use for person_1, would just be "person_1.[method_name]()"
+		- jQuery
+			- (Loaded via hosted library, akin to Bootstrap)
+				- (i.e. <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>)
+			- Simplification of pure javascript
+				- "$" at the beginning of a statement signifies you're using jQuery
+					- Can also embed jQuery inside javascript on the same line
+						- i.e. "console.log($([element]).hasClass([class name]));"
+			- Selecting items
+				- "$("[element]")
+					- Instead of document.querySelector("[element]")
+				- No difference between selecting one, (.querySelector) or many, (.querySelectorAll) items
+			- Modifying items
+				- i.e. ".toggleClass('[class name]');"
+					- Instead of ".classList.toggle[[class name]];"
+				- Any modifications will apply to every matching item, (whether singular or in an array)
+			- Adding/Removing html elements, (without altering actual html files)
+				- Adding
+					- Around the [element]:
+						- Add [html code] immediately BEFORE [element]'s OPENING tag.
+							- "$("[element]").before("[html code]");"
+						- Add [html code] immediately AFTER [element]'s CLOSING tag.						
+							- "$("[element]").after("[html code]");"
+					- Inside of the [element]:
+						- Add [html code] immediately AFTER [element]'s OPENING tag.
+							- "$("[element]").prepend("[html code]");"
+						- Add [html code] immediately BEFORE [element]'s CLOSING tag.							
+							- "$("[element]").append("[html code]");"
+					- i.e. BEFORE <h1> PREPEND [prior h1 content] APPEND </h1> AFTER
+				- Removing - "$("[element]").remove();"
+
+					
