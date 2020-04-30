@@ -281,5 +281,3 @@
 							- "$("[element]").append("[html code]");"
 					- i.e. BEFORE <h1> PREPEND [prior h1 content] APPEND </h1> AFTER
 				- Removing - "$("[element]").remove();"
-
-					
