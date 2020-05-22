@@ -289,7 +289,7 @@
 					- Text-based setup wizard
 						- Will create package.json file with results
 							- Most important probably the "dependencies" item
-								- Symantic Versioning
+								- Semantic Versioning
 									- [Major Release Version].[Minor Release Version].[Patch Version]
 										- i.e. 3.2.5
 									- Bug fixes that don't break any functionality increment [Patch Version]
