@@ -281,3 +281,40 @@
 							- "$("[element]").append("[html code]");"
 					- i.e. BEFORE <h1> PREPEND [prior h1 content] APPEND </h1> AFTER
 				- Removing - "$("[element]").remove();"
+		- Node / Node.js
+			- Allows Javascript to run outside of the browser
+			- For each new project
+				- npm init
+					- (inside project directory)
+					- Text-based setup wizard
+						- Will create package.json file with results
+							- Most important probably the "dependencies" item
+								- Symantic Versioning
+									- [Major Release Version].[Minor Release Version].[Patch Version]
+										- i.e. 3.2.5
+									- Bug fixes that don't break any functionality increment [Patch Version]
+										- i.e. 3.2.6
+									- Feature additions that don't break functionality increment [Minor Release Version]
+										- i.e. 3.3.0
+									- Functionality-breaking additions/subtractions increment [Major Release Version]
+										- i.e. 4.0.0
+								- When specifying dependency versions, three options:
+									- Precise version only -> "3.2.5"
+									- Precise version + [Patch Version] -> "~3.2.5"
+									- Precise version + [Minor Release Version] -> "^3.2.5"
+			- Express
+				- Node framework analogous to jQuery for Javascript
+				- Issues @ 2020-05-22
+					- Express uses symlinks when installing, which will not work on FAT32/NTFS volumes
+						- (FAT32/NTFS volumes don't allow creation of Linux symlinks)
+					- npm has a --no-bin-links flag which should deal with this, but the flag doesn't work
+						- (Hasn't worked since at least 2014...  :/ )
+							- (That's a real confidence booster for the quality of Node's QA...)
+							- (You'd think that would be kind of important especially with WSL/WSL2...)
+								- (Leaving aside all the folks running Linux in virtual machines on Windows..)
+					- Workaround, (https://stackoverflow.com/questions/21425980/npm-install-without-symlinks-option-not-working/54588310#54588310)
+						- Have to install on a drive that does create proper symlinks, (i.e. ext4, zfs, etc)
+							- Then use rsync to convert symlinks to hard links
+							- Then copy directory with converted hard links to FAT32/NTFS
+				- node [package.json "main" filename] will start server
+					- Note: have to stop / restart server on each edit of [package.json "main" filename]
