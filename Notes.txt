@@ -309,9 +309,6 @@
 						- (FAT32/NTFS volumes don't allow creation of Linux symlinks)
 					- npm has a --no-bin-links flag which should deal with this, but the flag doesn't work
 						- (Hasn't worked since at least 2014...  :/ )
-							- (That's a real confidence booster for the quality of Node's QA...)
-							- (You'd think that would be kind of important especially with WSL/WSL2...)
-								- (Leaving aside all the folks running Linux in virtual machines on Windows..)
 					- Workaround, (https://stackoverflow.com/questions/21425980/npm-install-without-symlinks-option-not-working/54588310#54588310)
 						- Have to install on a drive that does create proper symlinks, (i.e. ext4, zfs, etc)
 							- Then use rsync to convert symlinks to hard links
