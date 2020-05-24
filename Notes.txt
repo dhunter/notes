@@ -284,11 +284,11 @@
 		- Node / Node.js
 			- Allows Javascript to run outside of the browser
 			- For each new project
-				- npm init
+				- Initialize -> "npm init"
 					- (inside project directory)
 					- Text-based setup wizard
-						- Will create package.json file with results
-							- Most important probably the "dependencies" item
+						- Will create [package.json] file with results
+							- For "dependencies" item:
 								- Semantic Versioning
 									- [Major Release Version].[Minor Release Version].[Patch Version]
 										- i.e. 3.2.5
@@ -302,6 +302,14 @@
 									- Precise version only -> "3.2.5"
 									- Precise version + [Patch Version] -> "~3.2.5"
 									- Precise version + [Minor Release Version] -> "^3.2.5"
+				- Startup -> "node [package.json "main" js file]"
+					- If code inside [package.json "main" js file] would start a webserver:
+						- Requires manually stopping and restarting the server for each saved change in [package.json "main" js file]
+						- Nodemon
+							- Drop-in webserver replacement for basic "node [package.json "main" js file]"
+								- "nodemon [package.json "main" js file]"
+									- (To install -> "npm install -g nodemon")
+							- Automatically stops and restarts server with every saved change in [package.json "main" js file]
 			- Express
 				- Node framework analogous to jQuery for Javascript
 				- Issues @ 2020-05-22
@@ -313,5 +321,17 @@
 						- Have to install on a drive that does create proper symlinks, (i.e. ext4, zfs, etc)
 							- Then use rsync to convert symlinks to hard links
 							- Then copy directory with converted hard links to FAT32/NTFS
-				- node [package.json "main" filename] will start server
-					- Note: have to stop / restart server on each edit of [package.json "main" filename]
+				- Using, (add below inside [package.json "main" js file]):
+					- const express = require("express");
+					  const app = express();
+					- app.listen([port number]) sets port server will respond on
+					- Add routes, (/url permutations) that you want to respond to
+						- app.get([route], function(request, response) {
+							response.send([response desired]);
+						})
+							- [route] examples:
+								- "/" - home route
+									- i.e. responds to the base url of your website
+								- "/contact" -> [base url]/contact
+								- "/about" -> [base url]/about
+						- Can have as many routes in [package.json "main" js file] as you want.
