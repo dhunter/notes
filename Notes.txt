@@ -317,21 +317,59 @@
 						- (FAT32/NTFS volumes don't allow creation of Linux symlinks)
 					- npm has a --no-bin-links flag which should deal with this, but the flag doesn't work
 						- (Hasn't worked since at least 2014...  :/ )
-					- Workaround, (https://stackoverflow.com/questions/21425980/npm-install-without-symlinks-option-not-working/54588310#54588310)
-						- Have to install on a drive that does create proper symlinks, (i.e. ext4, zfs, etc)
-							- Then use rsync to convert symlinks to hard links
-							- Then copy directory with converted hard links to FAT32/NTFS
-				- Using, (add below inside [package.json "main" js file]):
+					- Workaround
+						- Create [twin project directory] on a drive that does create proper symlinks, (i.e. ext4, zfs)
+						- Install Express, (and every other non-global module you need for that project) in
+						  [twin project directory]. 
+						- Delete any prior /node_modules/ directory in [FAT32 project directory]
+						- Use rsync to create a copy in [FAT32 project directory], converting symlinks to hard
+						  links.
+							- "rsync --archive --verbose --copy-links ./node_modules/ [FAT32 project directory]/node_modules/"
+						- cp [twin project directory]/package.json and [twin project directory]/package-lock.json
+						  to [FAT32 project directory]
+				- Enabling, (add below inside [package.json "main" js file]):
 					- const express = require("express");
 					  const app = express();
 					- app.listen([port number]) sets port server will respond on
 					- Add routes, (/url permutations) that you want to respond to
-						- app.get([route], function(request, response) {
-							response.send([response desired]);
-						})
+						- (if files) app.[HTTP method]([route], function(request, response) {
+							response.sendFile(__dirname + "/[relative path to file to send]");
+						}) OR (if text) app.[HTTP method]([route], function(request, response) {
+							response.send("[random text]");
+							- (__dirname is a Node special variable equal to the absolute directory of the current
+							  working directory)
+							- Where [HTTP method] = "post", "get", "put" or "delete"
+								- (corresponding to "create", "read", "update" and "delete" operations)
+								- i.e. (if files) app.get("/", function(request, response) {
+									response.sendFile(__dirname + "/index.html");
+								  }) OR (if text) app.get("/", function(request, response) {
+									response.send("Hello World");
 							- [route] examples:
 								- "/" - home route
 									- i.e. responds to the base url of your website
 								- "/contact" -> [base url]/contact
 								- "/about" -> [base url]/about
 						- Can have as many routes in [package.json "main" js file] as you want.
+				- Client/server interation
+					- Client, (displaying html file you sent -> [__dirname + "/[html file]"]), i.e:
+						- <form action="/" method="post">
+        					  <input type="text" name="num1" placeholder="First Number">
+        					  <input type="text" name="num2" placeholder="Second Number">
+        					  <button type="submit" name="submit">Calculate</button>
+    					  </form>
+					- Server
+						- Body Parser, (npm install body-parser)
+							- In [package.json "main" js file]
+								- "const body_parser = require("body-parser");"
+								- Tell Express to use it
+									- app.use(body_parser.urlencoded({extended: true}));
+										- (several .[X] parser types)
+								- Do whatever you want with the received data inside the app.post route, i.e:
+								- app.post("/", function(req, res) {
+									var num1 = Number(req.body.num1);
+									var num2 = Number(req.body.num2);
+
+									var result = num1 * num2;
+									res.send("The result of the calculation is " + result);
+								})
+									- (Note: body-parser returns parsed items as strings)
