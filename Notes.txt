@@ -345,6 +345,7 @@
 									- i.e. responds to the base url of your website
 								- "/contact" -> [base url]/contact
 								- "/about" -> [base url]/about
+					- (Note: Can only have one response.send/.sendFile per route)
 				- Client/server interation
 					- Client, (displaying html file you sent -> [__dirname + "/[html file]"]), i.e:
 						- <form action="/" method="post">
@@ -366,5 +367,13 @@
 
 									var result = num1 * num2;
 									res.send("The result of the calculation is " + result);
-								  })
+								})
 									- (Note: body-parser returns parsed items as strings by default)
+						- Remote Elements, (via API)
+							- (Using Node's https module)
+							- https.get([url], function(response) {
+								response.on([information desired from API response, often "data"], function(data) {
+									JSON.parse(data);
+								})
+							})
+								- (Note: "data" in above function arrives in hexadecimal format, hence use of [X].parse, where "data" is in [X, often "JSON"] format)
