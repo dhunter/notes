@@ -333,6 +333,14 @@
 							- Move all css, image and other static files into [project directory]/public
 						- In [package.json "main" js file]
 							- "app.use(express.static(__dirname + '/public'));"
+								- Note: for html link purposes, this will make [project directory]/public considered to be in the same directory as .html(/.ejs) files being rendered
+									- i.e. If styles.css actually exists at [project directory]/public/css/styles.css and
+										- index.html actually exists at [project directory]
+										- After adding the express.static setting, the css link inside index.html:
+											- SHOULD BE: "<link rel="stylesheet" href="css/styles.css">"
+												- (as if the css subdirectory was directly in [project directory], even though it's not)
+											- NOT: "<link rel="stylesheet" href="/public/css/styles.css">"
+												- (which is where the file actually is)
 					- app.listen([port number]) sets port server will respond on
 					- Add routes, (/url permutations) that you want to respond to
 						- (if files) app.[HTTP method]([route], function(request, response) {
@@ -363,8 +371,8 @@
 						- Body Parser, (npm install body-parser)
 							- In [package.json "main" js file]
 								- "const body_parser = require("body-parser");"
-								- Tell Express to use it
-									- app.use(body_parser.urlencoded({extended: true}));
+								- (below the "const app = express();" line)
+									- "app.use(body_parser.urlencoded({extended: true}));"
 										- (several .[X] parser types)
 								- Do whatever you want with the received data inside the app.post route, i.e:
 								- app.post("/", function(req, res) {
@@ -383,6 +391,35 @@
 								})
 							})
 								- (Note: "data" in above function arrives in hexadecimal format, hence use of [X].parse, where "data" is in [X, often "JSON"] format)
+						- Templating
+							- EJS, (Embedded JavaScript Templating)
+								- Create "views" subdirectory in [project directory]
+									- (precise directory name important - "views")
+									- Make any html files in [project directory]/views with an ".ejs" extension, (instead of ".html")
+										- To populate values from your [package.json "main" js file]
+											- Add "<%= [variable name] %>"
+										- To add control flow, (and only control flow) logic
+											- (i.e. to change the way an element is rendered based on the result of [variable name])
+											- Add "<%" and "%>" at the beginning and end of every single line of javascript only
+												- (i.e. do not add to any lines with html tags), i.e.:
+													- <% if (day === "Saturday" || day === "Saturday") { %>
+														  <h1 class="weekend">Today is <%= day %></h1>
+													  <% } else { %>
+													 	  <h1 class="weekday">Today is <%= day %></h1>
+													  <% } %>
+											- NOTE: When trying to comment out lines with <% %>
+												- EJS will not respect regular html comment tags, (i.e. "<!--" "-->")
+													- Meaning the line of javascript you just tried to comment out will still run
+												- To actually stop lines with <% %> from running
+													- You have to manually add javascript comment tags, (i.e. "//") AFTER the opening "<%"
+								- In [package.json "main" js file]
+									- To enable
+										- "const ejs = require('ejs');"
+										- (below the "const app = express();" line)
+											- "app.set('view engine', 'ejs');"
+									- To return information via a route
+										- "res.render('[name of specific /views ejs file, without ejs extension - i.e. 'index'], {[variable name used in ejs file]: '[variable name used in [package.json "main" js file]]'});"
+											- i.e. "res.render('index', {day: day});"
 			- (Github)
 				- Hiding API keys, (and other sensitive info)
 					- Add ".env" file to [project directory]
