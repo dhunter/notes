@@ -252,6 +252,38 @@
 				- i.e. in above Person definition, add:
 					- this.[method_name] = function() {[function definition]}
 				- To use for person_1, would just be "person_1.[method_name]()"
+		- Javascript Quirks
+			- Scope
+				- Javascript has 3 concepts of scope for 3 types of assignments:
+					- Normal types
+						- Global Scope, (available everywhere)
+							- var x   -> global
+							- let x   -> global
+							- const x -> global
+						- Block-level Scope, (available only inside a function)
+							- NOTE: in Javascript, this is literally only inside a code block defined by the "function" keyword
+							- var x   -> local
+							- let x   -> local
+							- const x -> local
+					- Unusual type
+						- Inside any other code block not defined by the "function" keyword
+							- (i.e. if/else, for, do/while, etc)
+							- var x   -> global
+							- let x   -> local
+							- const x -> local
+				- For maximum similarity to other languages, always use "let" instead of "var"
+					- ("let" was specifically added to the language in ECMAScript 6 to address this issue)
+			- Constants that aren't real constants, (i.e. that aren't immutable)
+				- const [array name]
+					- You can't reassign [array name] entirely, (which is good)
+						- But you can still push items into it, (which is bad)
+				- const [object name] = {[key], [value]}
+					- You can't reassign [object name] entirely, (which is good)
+					- You can't overwrite the name of [key], (which is good)
+						- But you can change [value] of [key], (which is bad)
+					- You can actually make [object name] immutable after the const assignment
+						- By adding Object.freeze([object name])
+				- For maximum similarity to other languages, don't use "const" keyword if the array or object isn't really immutable
 		- jQuery
 			- (Loaded via hosted library, akin to Bootstrap)
 				- (i.e. <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>)
@@ -376,10 +408,10 @@
 										- (several .[X] parser types)
 								- Do whatever you want with the received data inside the app.post route, i.e:
 								- app.post("/", function(req, res) {
-									var num1 = Number(req.body.num1);
-									var num2 = Number(req.body.num2);
+									let num1 = Number(req.body.num1);
+									let num2 = Number(req.body.num2);
 
-									var result = num1 * num2;
+									let result = num1 * num2;
 									res.send("The result of the calculation is " + result);
 								})
 									- (Note: body-parser returns parsed items as strings by default)
@@ -402,11 +434,9 @@
 											- (i.e. to change the way an element is rendered based on the result of [variable name])
 											- Add "<%" and "%>" at the beginning and end of every single line of javascript only
 												- (i.e. do not add to any lines with html tags), i.e.:
-													- <% if (day === "Saturday" || day === "Saturday") { %>
-														  <h1 class="weekend">Today is <%= day %></h1>
-													  <% } else { %>
-													 	  <h1 class="weekday">Today is <%= day %></h1>
-													  <% } %>
+													- <% for(let i = 0; i < items.length; i++) { %>
+            											<li><%= items[i] %></li>
+        											  <% } %>
 											- NOTE: When trying to comment out lines with <% %>
 												- EJS will not respect regular html comment tags, (i.e. "<!--" "-->")
 													- Meaning the line of javascript you just tried to comment out will still run
@@ -420,6 +450,47 @@
 									- To return information via a route
 										- "res.render('[name of specific /views ejs file, without ejs extension - i.e. 'index'], {[variable name used in ejs file]: '[variable name used in [package.json "main" js file]]'});"
 											- i.e. "res.render('index', {day: day});"
+								- Layouts, (/Partials)
+									- In Views directory
+										- Create .ejs files to hold whatever commonly-repeated portions of pages you want
+											- i.e. "header.ejs" and "footer.ejs"
+										- Put repeated portions from [Main].ejs file into appropriate alternate .ejs files, i.e.:
+											- In header.ejs
+												- <!DOCTYPE html>
+												  <html lang="en">
+												  <head>
+													  <meta charset="UTF-8">
+													  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+													  <title>[Appropriate Title]</title>
+
+													  <link rel="stylesheet" href="css/styles.css">
+												  </head>
+												  <body>
+											- In footer.ejs
+												- </body>
+												  </html>
+										- In [Main].ejs file
+											- "<%- include("header") -%>" where header info used to be
+											- "<%- include("footer") -%>" where footer info used to be
+			- Modules, (local)
+				- Way of externalizing bits of code for reuse / refactoring
+				- Works same as any npm-installed module
+					- (Other than requiring the absolute module filename, (local) vs module name, (npm))
+					- In [package.json "main" js file]
+						- Require module
+							- const [constant name] = require(__dirname + "/[module filename relative to project directory]);
+								- i.e. "const date = require(__dirname + "/date.js");"
+						- Use functions in the module
+							- [constant name].[function name WITHOUT parenthesis]();
+								- i.e. "date.get_date();"
+					- In [module filename relative to project directory]
+						- Bundle desired functionality inside anonymous function(s) with appropriate return(s)
+						- Connect anonymous function(s) with exports.[function name WITHOUT parenthesis]
+							- i.e. "exports.get_date = function() {
+								  	    [whatever get_date actually does, including return statement]
+							  		};"
+							- Gives [package.json "main" js file] access to function(s) return(s)
+		
 			- (Github)
 				- Hiding API keys, (and other sensitive info)
 					- Add ".env" file to [project directory]
