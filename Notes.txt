@@ -552,3 +552,70 @@
 					- In [project directory]
 						- "heroku create" to add heroku git remote
 						- "git push heroku master"
+	- Databases
+		- SQL vs NoSQL
+			- SQL, (/Relational)
+				- Most popular: MySQL, (Postgres)
+				- Stores records as entries in (multiple) tables linked by formal relationships
+					- All entries have to have all attributes, (even if attribute = Null)
+				- Pros
+					- Very good in situations where a (relatively) larger number of entities generate few records
+						- i.e. ecomm, (/Customers/Products/Orders)
+					- Search speed for complex queries faster
+			- NoSQL, (/Non-Relational)
+				- Most popular: MongoDB, (Redis)
+				- Stores records as JSON objects
+					- Entries can have as many or as few attributes as relevant
+						- Easier to make adjustments if requirements frequently change
+					- Can still specify relationships between JSON objects via attributes, but not as efficient for complex queries
+				- Pros
+					- Very good in situations where a (relatively) smaller number of entities generate a lot of records
+						- i.e. Blog posts / Twitter / Instagram
+					- Cheaper to scale
+						- i.e. Scales well horizontally
+		- SQL
+			- Table level
+				- Create table
+					- CREATE TABLE [table name] (
+					  [column name 1 - i.e. "id"] [datatype 1 - i.e. "INT"] [column traits - i.e. "NOT NULL"],
+					  [column name 2] [datatype 2],
+					  ...
+					  PRIMARY KEY ([primary key column name - i.e. "id"]) // optional
+					  FOREIGN KEY ([local table column name]) REFERENCES [foreign table name]([foreign table column name]) // establishes relationships between tables.
+					  )
+				- Add columns to a table
+					- ALTER TABLE [table name]
+					  ADD [column name] [datatype];
+				- Delete table
+					- DROP TABLE [table name];
+			- Record level, (CRUD)
+				- Create record(s) in table
+					- INSERT INTO [table name] ([column name 1], [column name 2], ...)
+					  VALUES ([value 1], [value 2], ...);
+				- Read record(s) from table
+					- SELECT [column name 1], [column name 2], ... from [table name]
+					  WHERE [column name(s)] = [value(s) that select only relevant records]
+				- Update value(s) in a table
+					- UPDATE [table name]
+					  SET [column name]=[value]
+					  WHERE [column name(s)] = [value(s) that select only relevant records];
+				- Delete record(s) from table
+					- DELETE FROM [table name]
+					  WHERE [column name(s)] = [value(s) that select only relevant records]
+			- Joins
+				- Types
+					- INNER JOIN = records exist in both tables
+						- Left table record count = right table record count
+						- Venn diagram = left table - union only, right table - union only
+					- LEFT JOIN = all records from first, (i.e. left-most) table and values from second, (i.e. right-most) table where they exist
+						- Left table record count >= right table record count
+						- Venn diagram = full left table, right table - union only
+					- RIGHT JOIN = (reverse of left)
+						- Left table record count <= right table record count
+						- Venn diagram = full right table, left table - union only
+					- FULL OUTER JOIN = all records from left and right, connected where joined columns are equal
+						- Left table record count + right table record count, including union
+						- Venn diagram = full left table, full right table
+				- SELECT [table name that contains foreign key definitions].[column name 1], [table name that doesn't contain foreign key definitions].[column name 3]
+				  FROM [table name that contains foreign key definitions]
+				  INNER JOIN [table name that doesn't contain foreign key definitions] ON [table name that contains foreign key definitions].[appropriate foreign key column name] = [table name that doesn't contain foreign key definitions].[column name in this table that matches foreign key in other table]
