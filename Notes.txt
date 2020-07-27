@@ -619,3 +619,53 @@
 				- SELECT [table name that contains foreign key definitions].[column name 1], [table name that doesn't contain foreign key definitions].[column name 3]
 				  FROM [table name that contains foreign key definitions]
 				  INNER JOIN [table name that doesn't contain foreign key definitions] ON [table name that contains foreign key definitions].[appropriate foreign key column name] = [table name that doesn't contain foreign key definitions].[column name in this table that matches foreign key in other table]
+		- MongoDB
+			- In Mongo shell
+				- Use, (/create) db - "use [database name]"
+					- Confirm by showing current database => "db"
+					- Note: if [database name] does not exist, it will automatically be created.
+				- Collection / Table level
+					- Show all collections / tables => "show collections"
+					- Relationships, (i.e. SQL Foreign Key "equivalent")
+						- Preferred => Embed "sub-documents" directly into relevant records as an array, i.e.:
+							- 	reviews: [
+									{
+										author: "Sally",
+										rating: 5,
+										review: "Best doodad ever!"
+									},
+									{
+										author: "John",
+										rating: 5,
+										review: "Awesome doodad!"
+									}
+								]
+						- Can also => Manually reference records in other collection(s) / table(s), i.e. in db.orders:
+							- 	{
+									order: 2541,
+									products_id: [1, 2],  //  where [1, 2] = db.products.find({_id: 1}) & db.products.find({_id: 2})
+									users_id: 245  //  where 245 = db.users.find({_id: 245})
+								}
+				- Record level, (CRUD)
+					- Create record(s)
+						- db.[collection / table name].insertOne(   // or db.[collection / table name].insertMany( 
+							{[JSON object(s)]}  // i.e. name: sue, age: 26, status: "pending"
+							)
+							- Note: if [collection / table name] does not exist, it will automatically be created.
+							- Note: "_id" is the default primary key field.
+					- Read
+						- db.[collection / table name].find(
+							{ [key]: [value / expression - i.e. { $gt: 18 }] },  // Where clause, optional
+							{ [key_1]: 1, [key_2]: 1}  // 1 = true / yes, return this field, optional 
+							).limit([max records to retrieve])  // limit, optional
+						- db.[collection / table name].find()
+							- Select * from [collection / table name] equivalent
+					- Update
+						- db.[collection / table name].updateOne(  // or db.[collection / table name].updateMany(
+							{ [key]: [value / expression - i.e. { $gt: 18 }] },  // Where clause
+							{ $set: { [key]: [value] } }
+							)
+					- Delete
+						- db.[collection / table name].deleteOne(  // or db.[collection / table name].deleteMany(
+							{ [key]: [value / expression - i.e. { $gt: 18 }] },  // Where clause
+							)
