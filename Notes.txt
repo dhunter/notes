@@ -588,18 +588,18 @@
 					  ADD [column name] [datatype];
 				- Delete table
 					- DROP TABLE [table name];
-			- Record level, (CRUD)
-				- Create record(s) in table
+			- Record level, [CRUD]
+				- [Crud] Create record(s) in table
 					- INSERT INTO [table name] ([column name 1], [column name 2], ...)
 					  VALUES ([value 1], [value 2], ...);
-				- Read record(s) from table
+				- [cRud] Read record(s) from table
 					- SELECT [column name 1], [column name 2], ... from [table name]
 					  WHERE [column name(s)] = [value(s) that select only relevant records]
-				- Update value(s) in a table
+				- [crUd] Update value(s) in a table
 					- UPDATE [table name]
 					  SET [column name]=[value]
 					  WHERE [column name(s)] = [value(s) that select only relevant records];
-				- Delete record(s) from table
+				- [cruD] Delete record(s) from table
 					- DELETE FROM [table name]
 					  WHERE [column name(s)] = [value(s) that select only relevant records]
 			- Joins
@@ -620,10 +620,14 @@
 				  FROM [table name that contains foreign key definitions]
 				  INNER JOIN [table name that doesn't contain foreign key definitions] ON [table name that contains foreign key definitions].[appropriate foreign key column name] = [table name that doesn't contain foreign key definitions].[column name in this table that matches foreign key in other table]
 		- MongoDB
-			- In Mongo shell
-				- Use, (/create) db - "use [database name]"
-					- Confirm by showing current database => "db"
-					- Note: if [database name] does not exist, it will automatically be created.
+			- In Mongo Shell
+				- Database level
+					- Use, (/create) db => "use [database name]"
+						- Confirm by showing current database => "db"
+						- Note: if [database name] does not exist, it will automatically be created.
+					- Delete db
+						- use [database name that you want to delete]
+						- db.dropDatabase()
 				- Collection / Table level
 					- Show all collections / tables => "show collections"
 					- Relationships, (i.e. SQL Foreign Key "equivalent")
@@ -646,26 +650,161 @@
 									products_id: [1, 2],  //  where [1, 2] = db.products.find({_id: 1}) & db.products.find({_id: 2})
 									users_id: 245  //  where 245 = db.users.find({_id: 245})
 								}
-				- Record level, (CRUD)
-					- Create record(s)
+				- Record level, [CRUD]
+					- [Crud] Create record(s)
 						- db.[collection / table name].insertOne(   // or db.[collection / table name].insertMany( 
 							{[JSON object(s)]}  // i.e. name: sue, age: 26, status: "pending"
 							)
 							- Note: if [collection / table name] does not exist, it will automatically be created.
 							- Note: "_id" is the default primary key field.
-					- Read
+					- [cRud] Read
 						- db.[collection / table name].find(
 							{ [key]: [value / expression - i.e. { $gt: 18 }] },  // Where clause, optional
 							{ [key_1]: 1, [key_2]: 1}  // 1 = true / yes, return this field, optional 
 							).limit([max records to retrieve])  // limit, optional
 						- db.[collection / table name].find()
 							- Select * from [collection / table name] equivalent
-					- Update
+					- [crUd] Update
 						- db.[collection / table name].updateOne(  // or db.[collection / table name].updateMany(
 							{ [key]: [value / expression - i.e. { $gt: 18 }] },  // Where clause
 							{ $set: { [key]: [value] } }
 							)
-					- Delete
+					- [cruD] Delete
 						- db.[collection / table name].deleteOne(  // or db.[collection / table name].deleteMany(
 							{ [key]: [value / expression - i.e. { $gt: 18 }] },  // Where clause
 							)
+			- Mongoose
+				- Connect to database
+					- 	"const mongoose = require('mongoose');"
+						"mongoose.connect('mongodb://[mongodb access url:port]/[database name]', [deprecation warning items, if any]);"
+							- i.e. mongoose.connect('mongodb://localhost:27017/fruits_db', { useUnifiedTopology: true });
+				- Create database schema to define the structure of all new records, (/documents) that will be added to the database.
+					- Adding validation rules and relationships to other schemas, where desired
+						- Note: Any relationships defined will really just embed foreign schema objects into the current record, akin to the "sub-documents" discussed in the "In Mongo Shell" section, above.
+							- And, unless both aspects of the relationship, (i.e. the local object and the foreign schema object) are created and saved in the exact same run of index.js, (which will probably be extremely rare) though the data embedded will mostly be the same, the _id's of the object and its embedded counterpart will be different
+								- So you won't be able to later query the _id of the embedded object and use that to query the table/collection that embedded object came from to get the original object
+					- 	"const [schema name] = new mongoose.Schema ({
+							[schema key_1]: {  // longer form, with validation
+								type: [datatype],
+								[validation_type_1]: [value],  // all validation_types are optional
+								[validation_type_2]: [value],  // all validation_types are optional
+							[schema key_2]: [datatype],  // shorter form, without validation
+							...
+							[local name for foreign schema object 1]: [foreign schema name]
+						})"
+							- i.e. const fruit_schema = new mongoose.Schema ({
+								name: {  // validation
+									type: String,
+									required: true
+								},  
+								rating: {  // validation
+									type: Number,
+									min: 1,
+									max: 10
+								},
+								review: String  // no validation,
+								primary_pollenator: pollenator_schema
+							});
+				- Create model to define tables / collections
+					- 	"const [capitalized model name] = mongoose.model([singular version of table/collection name - i.e. 'fruit' for a table/collection name of 'fruits'], [schema name]);"
+							- i.e. const Fruit = mongoose.model('fruit', fruit_schema);
+				- [Crud] Create actual record(s), (/document(s))
+					- Create records to be saved to database
+						- 	"const [record name] = new [capitalized model name] ({
+								[schema key_1]: [value],
+								[schema key_2]: [value],
+								...
+								[local name for foreign schema object 1]: [object created from foreign schema]
+							});"
+								- i.e. const apple = new Fruit ({
+									name: "Apple",
+									rating: 7,
+									review: "A solid fruit",
+									primary_pollenator: bee  // where bee was created via "const bee = new Pollenator ..."
+								});
+					- Save record(s) / document(s) to the database
+						- Single item
+							- "[record name].save();"
+						- Multiple items
+							- 	"[capitalized model name].insertMany([array of [record names] to be added], function(err) {
+									if (err) {
+										[error handling for failure to save records]
+									} else {
+										[success handling for saving records]
+									}
+								});"
+									- i.e. Fruit.insertMany([kiwi, orange, banana], function(err) {
+										if (err) {
+											console.log(err);
+										} else {
+											console.log("Successfully added fruits");
+										}
+									});
+				- [cRud] Read data from db to confirm all records saved
+					- 	"[capitalized model name].find(function(err, [array name for [record names] to be retrieved]) {
+							if (err) {
+								[error handling for failure to retrieve records]
+							} else {
+								[success handling for retrieving records]
+							}
+						});"
+							- i.e. Fruit.find(function(err, fruits) {
+									if (err) {
+										console.log(err);
+									} else {
+										console.log(fruits);
+									}
+							});
+				- [crUd] Update record(s) in database, if necessary
+					- 	"[capitalized model name].updateOne(   // or .updateMany(
+							{[query parameters to locate record to be updated]},
+							{[key_to_update_1]: [value_to_update_to_1], [key_to_update_2]: [value_to_update_to_2]},
+							function(err) {
+								if (err) {
+									[error handling]
+								} else {
+									[success handling]
+								}
+						});"
+							- i.e. Fruit.updateOne(
+								{_id: 1},
+								{name: peach},
+								function(err) {
+									if (err) {
+										console.log(err);
+									} else {
+										console.log("Successfully updated record");
+									}
+							});
+				- [cruD] Delete record(s)
+					- 	"[capitalized model name].deleteOne(   // or .deleteMany(
+							{[query parameters to locate record to be updated]},
+							function(err) {
+								if (err) {
+									[error handling]
+								} else {
+									[success handling]
+								}
+						});"
+							- i.e. Fruit.deleteOne(
+								{_id: 1},
+								function(err) {
+									if (err) {
+										console.log(err);
+									} else {
+										console.log("Successfully deleted record");
+									}
+							});
+				- Close connection to database inside last interaction with database
+					- 	"mongoose.connection.close();"
+						- i.e. Fruit.deleteOne(
+							{_id: 1},
+							function(err) {
+								if (err) {
+									console.log(err);
+								} else {
+									console.log("Successfully deleted record");
+									mongoose.connection.close();
+								}
+						});
+						- Note: if done on its own, (i.e. not inside last interaction, as shown above) even if the command is at the very bottom of the index.js file, will throw one heck of a MongoError
