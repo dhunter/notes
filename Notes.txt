@@ -408,7 +408,24 @@
 									- i.e. responds to the base url of your website
 								- "/contact" -> [base url]/contact
 								- "/about" -> [base url]/about
-					- (Note: Can only have one response.send/.sendFile per route)
+						- (Note: Can only have one response.send/.sendFile per route)
+						- Route parameters
+							- Let's you define one route to respond to multiple url strings using variables
+								- app.[HTTP method]('/[fixed portion of url]/:[variable name for variable portion of url], function (req,res) { ...  
+									- i.e. In [package.json "main" js file]
+										- app.get('/users/:user_name', function (req, res) { ...
+									- Which would respond to "[base url]/users/jane" in a browser window
+									- Access [variable name for variable portion of url] via req.params.[variable name for variable portion of url]
+										- i.e. req.params.user_name = "Jane"
+									- Can respond to multiple fixed or variable portions of the url if desired
+										- i.e. app.get('/users/:user_name/book/:book_id', ... )
+									- [variable name for variable portion of url] can be made optional by adding "?" at the end
+										- i.e. app.get('/users/:user_name?', function (req, res) { ...
+											- Which will respond to either
+												- "[base url]/users/jane" OR "[base url]/users"
+										- Note: if a variable is optional, will need to add an if test for the variable being missing in the url string
+											- This test must test for the type of the variable being undefined, rather than the value of the variable being null, (which are apparently different...)
+												- i.e. if (typeof(req.params.user_name) === 'undefined') { ...
 				- Client/server interation
 					- Client, (displaying html file you sent -> [__dirname + "/[html file]"]), i.e:
 						- <form action="/" method="post">
