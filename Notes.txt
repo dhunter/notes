@@ -825,3 +825,26 @@
 								}
 						});
 						- Note: if done on its own, (i.e. not inside last interaction, as shown above) even if the command is at the very bottom of the index.js file, will throw one heck of a MongoError
+			- Deployment
+				- MongoDB Atlas, (cloud-hosted MongoDB service)
+					- Add cluster, (free vs paid)
+						- Select Cloud Provider, (AWS vs Google Cloud vs Azure)
+						- Select Cluster Tier, (M0 = free)
+						- Select version of MongoDB, (default fine)
+						- Change Cluster Name, if desired
+						- Click "Create cluster"
+						- Set IP Whitelist to allow connection from wherever desired, (can be "from anywhere")
+					- Add [mongodb user]
+					- Connect to Cluster
+						- From cluster webpage
+							- Click "Connect"
+								- Mongo Shell
+									- Copy / paste connection string to terminal
+								- Application
+									- Copy / paste string to .env environment variable, changing:
+										- "<password>" to [mongodb user's password]
+										- "<database>" to [app's desired database name]
+										- i.e. "mongodb+srv://[mongodb user]:[mongodb user's password]@[mongodb cluster url]/[app's desired database name]?retryWrites=true&w=majority 
+									- Adjust mongoose.connect string to use new environment variable
+										- i.e. "mongoose.connect(process.env.MONGODB_LOCATION_PRODUCTION, ...);"
+									- Restart node server
