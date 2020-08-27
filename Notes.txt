@@ -408,7 +408,16 @@
 									- i.e. responds to the base url of your website
 								- "/contact" -> [base url]/contact
 								- "/about" -> [base url]/about
-						- (Note: Can only have one response.send/.sendFile per route)
+							- Chaining Route Handlers
+								- Where the route is identical, (i.e. '/articles') rather than having entirely separate route handlers for each [HTTP method]
+									- i.e. app.get('/articles', ...), then app.post('/articles', ...), then app.put('/articles', ...)
+								- Can "chain" them together via app.route, i.e.
+									- app.route('/articles)
+									-     .get(function(req, res) { ...
+									-     .post(function(req, res) { ...
+									-     .put(function(req, res) { ...
+										- Note: Only put a ";" at the end of the last "chained" route, (i.e. after the .put)
+						- Note: Can only have one response.send/.sendFile per route)
 						- Route parameters
 							- Let's you define one route to respond to multiple url strings using variables
 								- app.[HTTP method]('/[fixed portion of url]/:[variable name for variable portion of url], function (req,res) { ...  
@@ -848,3 +857,53 @@
 									- Adjust mongoose.connect string to use new environment variable
 										- i.e. "mongoose.connect(process.env.MONGODB_LOCATION_PRODUCTION, ...);"
 									- Restart node server
+	- API
+		- RESTful
+			- Client Request
+				- Use HTTP request verbs
+					- Get (cRud)
+					- Post (Crud),
+					- Put (crUd)
+						- Updates / overwrites the entire record(s)
+					- Patch (crUd)
+						- Updates / overwrites only a portion of the record(s)
+					- Delete (cruD)
+				- Use specific pattern of routes / endpoint URLs
+					- /articles => performs HTTP verb on all articles
+					- /articles/george_washington => performs HTTP verb on individual "george_washington" article
+				- Test via cURL, (or Postman, if you prefer GUI-based)
+					- -X [HTTP verb other than GET, (GET is presumed)]
+						- (Note: if you pass a -d / --data-binary, cURL presumes a POST, so -X flag not explicitly required)
+					- -H "Content-Type: application/[x-www-form-urlencoded, json]"
+					- -d / --data-binary '[raw data (-d) / filename of datafile (--data-binary) to pass]
+						- x-www-form-urlencoded => '[key1]=[value1]&[key2]=[value2]&...'
+							- i.e. 'id=5&title=my%20title'
+						- json => '{"[key1]": "[value1], "[key2]": "[value2]"}'
+							- i.e. '{"id": 5, "title": "my title"}'
+						- datafile => @[filename]
+							- i.e. @my_data_file.json
+					- [URL to communicate with]
+					- i.e. "curl -X POST -H "Content-Type: application/json" -d '{"id": 5, "title": "my title"}' http://localhost:3000/articles"
+						- OR "curl -X POST -H "Content-Type: application/json" --data-binary @my_data_file.json http://localhost:3000/articles"
+			- Server Response
+				- /articles
+					- GET => Show all articles
+					- POST => Create one new article
+					- PUT => N/A, (/undefined)
+					- PATCH => N/A, (/undefined)
+					- DELETE => Deletes all articles
+				- /articles/george_washington
+					- GET => Gets the article on george_washington
+					- POST => N/A, (/undefined)
+					- PUT => Updates the entire article on george_washington
+					- PATCH => Updates a portion of the article on george_washington
+					- DELETE => Deletes the article on george_washington
+				- Add body-parser parsers to [package.json "main" js file] to correlate to HTTP Content-Types you wish to support
+					- application/x-www-form-urlencoded
+						- "app.use(body_parser.urlencoded({extended: true}));"
+							- (also used to serve regular HTML)
+					- application/json
+						- "app.use(body_parser.json());"
+					- Note: can have more than one parser enabled at a time.  
+						- The Content-Type passed in the request header will determine which one should be used by that request.
+			
