@@ -936,8 +936,7 @@
 					// This adds _ct and _ac fields to the schema, as well as pre 'init' and pre 'save' middleware,
 					// and encrypt, decrypt, sign, and authenticate instance methods
 					user_schema.plugin(encrypt, {encryptionKey: encryption_key, signingKey: signing_key, encryptedFields: ['password']});"
-				- Note1: These lines need to be added before the new mongoose.model
-				- Note2: The encryptedFields array is optional, but if you don't specify, it will make it very difficult to find records
+				- Note: These lines need to be added before the new mongoose.model
 				- Will automatically encrypt on every save command and automatically decrypt on every find command
 					- Note: On find commands, only decrypts the return object(s), so:
 						- Searching for a user(s) via unencrypted fields and then testing those results for decrypted fields will work, i.e.
