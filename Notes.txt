@@ -906,4 +906,42 @@
 						- "app.use(body_parser.json());"
 					- Note: can have more than one parser enabled at a time.  
 						- The Content-Type passed in the request header will determine which one should be used by that request.
-			
+	- Authentication
+		- Encryption, (mongoose-encryption)
+			- npm install mongoose-encryption
+			- "const encrypt = require('mongoose-encryption');"
+			- Generate encryption keys
+				- Either:
+					- Pair of base64 strings, (32-byte encryption key and 64-byte signing key), OR
+						- Can be anything, but openssl very good for easily generating (pseudo-)random strings
+						- In Terminal
+							- "openssl rand -base64 32"
+								- Save to .env file, (making sure to delete line breaks, if they exist)
+									- i.e. ENCRYPTION_KEY = [random sigils in terminal as a result of the openssl ...32 command]
+							- "openssl rand -base64 64"
+								- Save to .env file, (making sure to delete line breaks, if they exist)
+									- i.e. SIGNING_KEY = [random sigils in terminal as a result of the openssl ...64 command]
+					- Single key of any length
+						- Can be anything
+			- Use encryption keys to encrypt mongoose.Schema, i.e.:
+				-	"const user_schema = new mongoose.Schema({
+    					email: String,
+    					password: String
+					});
+
+					// Middleware for hashing
+					const encryption_key = process.env.ENCRYPTION_KEY
+					const signing_key = process.env.SIGNING_KEY
+
+					// This adds _ct and _ac fields to the schema, as well as pre 'init' and pre 'save' middleware,
+					// and encrypt, decrypt, sign, and authenticate instance methods
+					user_schema.plugin(encrypt, {encryptionKey: encryption_key, signingKey: signing_key, encryptedFields: ['password']});"
+				- Note1: These lines need to be added before the new mongoose.model
+				- Note2: The encryptedFields array is optional, but if you don't specify, it will make it very difficult to find records
+				- Will automatically encrypt on every save command and automatically decrypt on every find command
+					- Note: On find commands, only decrypts the return object(s), so:
+						- Searching for a user(s) via unencrypted fields and then testing those results for decrypted fields will work, i.e.
+							- 	"User.findOne({email: req.body.username}, function(err, found_user) {  // email is unencrypted
+									if (found_user.password === req.body.password) { ..."  // password is encrypted
+						- But using encrypted fields in the find command itself will not
+							- 	"User.findOne({email: req.body.username, password: req.body.password}, function(err, found_user) { ..."  // email is unencrypted, password is encrypted
