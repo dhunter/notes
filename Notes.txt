@@ -906,8 +906,9 @@
 						- "app.use(body_parser.json());"
 					- Note: can have more than one parser enabled at a time.  
 						- The Content-Type passed in the request header will determine which one should be used by that request.
-	- Authentication
-		- Encryption, (mongoose-encryption)
+	- Encryption & Authentication, (six levels of progressively stronger encryption)
+		- (Level 1) Store plain-text info in database, (don't do this! ;) 
+		- (Level 2) Using Encryption Keys, (mongoose-encryption)
 			- npm install mongoose-encryption
 			- "const encrypt = require('mongoose-encryption');"
 			- Generate encryption keys
@@ -944,3 +945,24 @@
 									if (found_user.password === req.body.password) { ..."  // password is encrypted
 						- But using encrypted fields in the find command itself will not
 							- 	"User.findOne({email: req.body.username, password: req.body.password}, function(err, found_user) { ..."  // email is unencrypted, password is encrypted
+		- (Level 3) Hashing
+			- Mathematical function that can be very quickly applied to info that you want to protect to create a new, encoded, value
+				- But takes much, much longer, (hopefully longer than would be worth the time to do) to reverse apply to the new, encoded, value to get back to the info that you wanted to protect
+				- Will always yield the exact same new, encoded, value for each given input value
+					- i.e. if given "123456," md5(123456) will always be the exact same string
+			- Removes need for the weak link of an encryption key
+				- That, once acquired, allows for full decryption of sensitive info
+			- Using md5 module
+				- npm install md5
+				- "const md5 = require('md5');"
+				- Save hashed password, (/other fields)
+					- Simply apply md5 function to the password before saving
+						- i.e. "password: md5(req.body.password) ..."
+				- Find (/match) to hashed values in database
+					- Simply apply md5 function to the unencrypted value and then compare that to the hashed value in the database
+						- i.e. "if (md5(req.body.password) === found_user.password) { ..."
+				- Don't need to worry about searching with unencrypted values first, then testing encrypted values as a second item, as above in the (Level 2) Encryption section
+					- i.e. Both of the below will work, so just up to coding preference
+						- 	"User.findOne({email: req.body.username}, function(err, found_user) {  // email is unencrypted
+								if (found_user.password === md5(req.body.password)) { ..."  // password is encrypted
+						- 	"User.findOne({email: req.body.username, password: md5(req.body.password)}, function(err, found_user) { ..."  // email is unencrypted, password is encrypted
