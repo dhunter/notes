@@ -332,10 +332,17 @@
 				- Removing - "$("[element]").remove();"
 		- Node / Node.js
 			- Allows Javascript to run outside of the browser
+			- To choose version of node to run, install "n" package globally
+				- "sudo npm install -g n"
+				- To use latest version
+					- "sudo n latest"
+				- To use LTS, (Long Term Support) version
+					- "sudo n lts"
 			- For each new project
 				- Initialize -> "npm init"
 					- (inside project directory)
 					- Text-based setup wizard
+						- (can also type "npm init -y" to accept all wizard defaults)
 						- Will create [package.json] file with results
 							- For "dependencies" item:
 								- Semantic Versioning
@@ -351,6 +358,10 @@
 									- Precise version only -> "3.2.5"
 									- Precise version + [Patch Version] -> "~3.2.5"
 									- Precise version + [Minor Release Version] -> "^3.2.5"
+				- Install any modules needed
+					- "npm install [module_name_1] [module_name_2] [module_name_3] ..."
+						- To install an older version of any module
+							- "npm install [module_name]@[version number]"
 				- Startup -> "node [package.json "main" js file]"
 					- If code inside [package.json "main" js file] would start a webserver:
 						- Requires manually stopping and restarting the server for each saved change in [package.json "main" js file]
@@ -908,43 +919,46 @@
 						- The Content-Type passed in the request header will determine which one should be used by that request.
 	- Encryption & Authentication, (six levels of progressively stronger encryption)
 		- (Level 1) Store plain-text info in database, (don't do this! ;) 
-		- (Level 2) Using Encryption Keys, (mongoose-encryption)
-			- npm install mongoose-encryption
-			- "const encrypt = require('mongoose-encryption');"
-			- Generate encryption keys
-				- Either:
-					- Pair of base64 strings, (32-byte encryption key and 64-byte signing key), OR
-						- Can be anything, but openssl very good for easily generating (pseudo-)random strings
-						- In Terminal
-							- "openssl rand -base64 32"
-								- Save to .env file, (making sure to delete line breaks, if they exist)
-									- i.e. ENCRYPTION_KEY = [random sigils in terminal as a result of the openssl ...32 command]
-							- "openssl rand -base64 64"
-								- Save to .env file, (making sure to delete line breaks, if they exist)
-									- i.e. SIGNING_KEY = [random sigils in terminal as a result of the openssl ...64 command]
-					- Single key of any length
-						- Can be anything
-			- Use encryption keys to encrypt mongoose.Schema, i.e.:
-				-	"const user_schema = new mongoose.Schema({
-    					email: String,
-    					password: String
-					});
+		- (Level 2) Using Encryption Keys
+			- Using mongoose-encryption module
+				- npm install mongoose-encryption
+				- "const encrypt = require('mongoose-encryption');"
+				- Generate encryption keys
+					- Either:
+						- Pair of base64 strings, (32-byte encryption key and 64-byte signing key), OR
+							- Can be anything, but openssl very good for easily generating (pseudo-)random strings
+							- In Terminal
+								- "openssl rand -base64 32"
+									- Save to .env file, (making sure to delete line breaks, if they exist)
+										- i.e. ENCRYPTION_KEY = [random sigils in terminal as a result of the openssl ...32 command]
+								- "openssl rand -base64 64"
+									- Save to .env file, (making sure to delete line breaks, if they exist)
+										- i.e. SIGNING_KEY = [random sigils in terminal as a result of the openssl ...64 command]
+						- Single key of any length
+							- Can be anything
+				- Use encryption keys to encrypt mongoose.Schema, i.e.:
+					-	"const user_schema = new mongoose.Schema({
+							email: String,
+							password: String
+						});
 
-					// Middleware for hashing
-					const encryption_key = process.env.ENCRYPTION_KEY
-					const signing_key = process.env.SIGNING_KEY
+						// Middleware for hashing
+						const encryption_key = process.env.ENCRYPTION_KEY
+						const signing_key = process.env.SIGNING_KEY
 
-					// This adds _ct and _ac fields to the schema, as well as pre 'init' and pre 'save' middleware,
-					// and encrypt, decrypt, sign, and authenticate instance methods
-					user_schema.plugin(encrypt, {encryptionKey: encryption_key, signingKey: signing_key, encryptedFields: ['password']});"
-				- Note: These lines need to be added before the new mongoose.model
-				- Will automatically encrypt on every save command and automatically decrypt on every find command
-					- Note: On find commands, only decrypts the return object(s), so:
-						- Searching for a user(s) via unencrypted fields and then testing those results for decrypted fields will work, i.e.
-							- 	"User.findOne({email: req.body.username}, function(err, found_user) {  // email is unencrypted
-									if (found_user.password === req.body.password) { ..."  // password is encrypted
-						- But using encrypted fields in the find command itself will not
-							- 	"User.findOne({email: req.body.username, password: req.body.password}, function(err, found_user) { ..."  // email is unencrypted, password is encrypted
+						// This adds _ct and _ac fields to the schema, as well as pre 'init' and pre 'save' middleware,
+						// and encrypt, decrypt, sign, and authenticate instance methods
+						user_schema.plugin(encrypt, {encryptionKey: encryption_key, signingKey: signing_key, encryptedFields: ['password']});"
+					- Note: These lines need to be added before the new mongoose.model
+					- Will automatically encrypt on every save command and automatically decrypt on every find command
+						- Note: On find commands, only decrypts the return object(s), so:
+							- Searching for a user(s) via unencrypted fields and then testing those results for decrypted fields will work, i.e.
+								- 	"User.findOne({email: req.body.username}, function(err, found_user) {  // email is unencrypted
+										if (found_user.password === req.body.password) { ..."  // password is encrypted
+							- But using encrypted fields in the find command itself will not
+								- 	"User.findOne({email: req.body.username, password: req.body.password}, function(err, found_user) { ..."  // email is unencrypted, password is encrypted
+				- Vulnerabilities
+					- If keys are obtained, all encrypted info can be immediately decrypted
 		- (Level 3) Hashing
 			- Mathematical function that can be very quickly applied to info that you want to protect to create a new, encoded, value
 				- But takes much, much longer, (hopefully longer than would be worth the time to do) to reverse apply to the new, encoded, value to get back to the info that you wanted to protect
@@ -953,7 +967,7 @@
 			- Removes need for the weak link of an encryption key
 				- That, once acquired, allows for full decryption of sensitive info
 			- Using md5 module
-				- npm install md5
+				- "npm install md5"
 				- "const md5 = require('md5');"
 				- Save hashed password, (/other fields)
 					- Simply apply md5 function to the password before saving
@@ -966,3 +980,62 @@
 						- 	"User.findOne({email: req.body.username}, function(err, found_user) {  // email is unencrypted
 								if (found_user.password === md5(req.body.password)) { ..."  // password is encrypted
 						- 	"User.findOne({email: req.body.username, password: md5(req.body.password)}, function(err, found_user) { ..."  // email is unencrypted, password is encrypted
+			- Vulnerabilities
+				- Subject to dictionary / brute force attacks
+					- Since so many people use common (and simple) passwords
+						- And hashing always returns the exact same encrypted string
+							- Hackers can simply create a table that lists common words, passwords, addresses, etc, (i.e. a dictionary) and those passwords' hashed values
+								- And can simply search any obtained hashed values against the hashed value column of that table to figure out original password
+								- (Calculating md5 hashes for 20 billion potential passwords / dictionary entries to create such a table can be processed in ~1 second on modern GPUs)
+		- (Level 4) Salting and Hashing
+			- Salting = creating a random string for each password/value to be encrypted, which is then appended to it
+				- With the concatenation then hashed
+					- Since this new concatenation is a much longer / more unique password than what the user would have used
+						- Much less vulnerable to dictionary attacks.
+				- The "salt"/random string for each password/value to be encrypted is then stored in the database
+					- Where it can be concatenated and hashed as needed
+				- Makes any password significantly more unique, and thus much more difficult to perform a dictionary attack against.
+					- But still potentially subject to dictionary attacks if hashes can continue to be calculated very quickly
+						- i.e. md5 -> 20 billion/second
+					- Could make dictionary attacks less likely:
+						- If a much less efficient hashing algorithm was chosen
+							- i.e. bcrypt -> 17000/second
+						- If multiple "Salt Rounds" were performed, i.e.
+							- Take [password], generate [salt], append [salt] to [password], hash [password+salt] to generate [hashed_string_1]
+							- Take [hashed_string_1], append [salt], hash [hashed_string_1+salt] to generate [hashed_string_2]
+							- Take [hashed_string_2], append [salt], hash [hashed_string_2+salt] to generate [hashed_string_3]
+							- ....
+			- Using bcrypt module
+				- Note: bcrypt is only released for stable versions of Nodejs
+					- Should be even-numbered releases
+						- As of 2020-09-15, though, the Current version is 14.10.1, which should be stable
+							- But there is no version of bcrypt listed on their website for version 14
+								- So reverted to the LTS version, (12.18.3) via the npm n module
+									- In Terminal: "sudo n lts"
+				- "npm install bcrypt"
+				- "const bcrypt = require('bcrypt');"
+				- "const salt_rounds = [number of salt rounds to use - 10 is a solid first choice];"
+					- i.e. "const salt_rounds = 10;"
+				- To store salted and hashed password, (/other field) in MongoDB
+					-	".post(function(req, res) {
+        					bcrypt.hash(req.body.password, salt_rounds, function(err, hash) {
+								const new_user = new User({
+									email: req.body.username,
+									password: hash
+								});
+								new_user.save(function(err) {
+							..."
+				- To compare entered password to salted and hashed password, (/other field) in MongoDB
+					-    ".post(function(req, res) {
+        					User.findOne({email: req.body.username}, function(err, found_user) {  
+            					if (found_user != null) {
+                					bcrypt.compare(req.body.password, found_user.password, function(err, result) {
+									if (result === true) {
+										// TO DO when passwords match
+                    				} else {
+										// TO DO when passwords DON'T match 
+									}
+							..."
+					- Note: we're back to testing email first, password as second call.
+				- Note: the bcrypt module combines the salt with the hash and stores both values as the hash/password, (/other field) in the database
+					- And automatically parses the two bits as / when necessary.
