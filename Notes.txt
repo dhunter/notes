@@ -1038,4 +1038,83 @@
 							..."
 					- Note: we're back to testing email first, password as second call.
 				- Note: the bcrypt module combines the salt with the hash and stores both values as the hash/password, (/other field) in the database
-					- And automatically parses the two bits as / when necessary.
+					- From which it automatically parses the two parts as / when necessary.
+		- (Level 5) Cookies and Sessions
+			- Using passport module, (passportjs.org)
+				- "npm install passport passport-local passport-local-mongoose express-session"
+					- (Note: 'express-session' NOT 'express-sessions')
+						- (Possible aid in making sure you're using the right package: check weekly downloads on Github) 
+				- 	"const session = require('express-session');"
+					"const passport = require('passport');"
+					"const passport_local_mongoose = require('passport-local-mongoose');"
+						- (Note: 'passport-local' is a dependency of 'passport-local-mongoose,' but is never called directly in the code, so doesn't need to be explicitly required)
+				- (At end of app.use section)
+					- 	"app.use(session({
+    						secret: process.env.SESSION_SECRET,
+    						resave: false,
+    						saveUninitialized: false
+						}));"
+							- (Where SESSION_SECRET in the .env file is any string)
+								- (Can generate via "openssl rand -base64 32" / "openssl rand -base64 64")
+						"app.use(passport.initialize());"
+						"app.use(passport.session());"
+				- (After "const [Mongoose Schema Name] = new mongoose.Schema({ ..." )  // Creating the schema
+					- 	"[Mongoose Schema Name].plugin(passport_local_mongoose);"
+						- i.e. "user_schema.plugin(passport_local_mongoose);"
+				- (After "const [Mongoose Model Name] = new mongoose.model('[Mongoose Model Name]', [Mongoose Schema Name]);")  // Creating the model, using the above schema
+					-	i.e. "const User = new mongoose.model('User', user_schema);"
+					-	"passport.use([Mongoose Model Name].createStrategy());"
+						"passport.serializeUser([Mongoose Model Name].serializeUser());"
+						"passport.deserializeUser([Mongoose Model Name].deserializeUser());"
+						- i.e. 	"passport.use(User.createStrategy());"
+								"passport.serializeUser(User.serializeUser());"
+								"passport.deserializeUser(User.deserializeUser());"
+				- To register new user
+					-	".post(function(req, res) {
+        					User.register({username: req.body.username}, req.body.password, function(err, user) {
+								if (err) {
+									console.log(err);
+									res.redirect('/register');  // Or wherever the register route is
+								} else {
+									passport.authenticate('local')(req, res, function() {
+										res.redirect('/[Whatever route is for your authenticated users only]');
+											// i.e. "res.redirect('/secrets');"
+									})
+								}
+							});
+						});"
+				- To login pre-registered user
+				    -	".post(function(req, res) {
+							const login_user = new User({
+								username: req.body.username,
+								password: req.body.password
+							});
+							req.login(login_user, function(err) {
+								if (err) {
+									console.log(err);
+									res.redirect('/login');  // Or wherever the login route is
+								} else {
+									passport.authenticate('local')(req, res, function() {
+										res.redirect('/[Whatever route is for your authenticated users only]');
+											// i.e. res.redirect('/secrets');
+									});
+								}
+							});
+						});"
+				- To test whether a user is authenticated before displaying [Whatever route is for your authenticated users only]
+					- 	"app.route('/[Whatever route is for your authenticated users only]')
+							// i.e. "app.route('/secrets')"
+    						.get(function(req, res) {
+								if(req.isAuthenticated()) {
+									res.render('secrets', {
+										user_email: req.user.username
+									});
+								} else {
+									res.redirect('/login');
+								}
+							});
+				- To log user out
+					- 	"app.get('/logout', function(req, res) {
+							req.logout();
+							res.redirect('/');
+						});"
