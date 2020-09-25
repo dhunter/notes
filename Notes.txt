@@ -1064,11 +1064,15 @@
 				- (After "const [Mongoose Model Name] = new mongoose.model('[Mongoose Model Name]', [Mongoose Schema Name]);")  // Creating the model, using the above schema
 					-	i.e. "const User = new mongoose.model('User', user_schema);"
 					-	"passport.use([Mongoose Model Name].createStrategy());"
-						"passport.serializeUser([Mongoose Model Name].serializeUser());"
-						"passport.deserializeUser([Mongoose Model Name].deserializeUser());"
 						- i.e. 	"passport.use(User.createStrategy());"
-								"passport.serializeUser(User.serializeUser());"
-								"passport.deserializeUser(User.deserializeUser());"
+					-	"passport.serializeUser(function(user, done) {
+							done(null, user.id);
+						});"
+					- 	"passport.deserializeUser(function(id, done) {
+							User.findById(id, function(err, user) {
+								done(err, user);
+							});
+						});"
 				- To register new user
 					-	".post(function(req, res) {
         					User.register({username: req.body.username}, req.body.password, function(err, user) {
@@ -1118,3 +1122,75 @@
 							req.logout();
 							res.redirect('/');
 						});"
+		- (Level 6) Third Party Oauth 2.0 / Social Signins
+			- Why Oauth?
+				- Developer can ask User for access to only very specific bits of information
+				- Developer can ask User for Read-only or Read/Write access
+				- User can revoke any permissions granted to anyone from authorizing website
+					- i.e. Google, Facebook, Twitter, etc
+			- How to Enable
+				- Step 1 - (one-time/website) Set up your application on website with which you will be using Oauth, (Google, Twitter, et al)
+				- Step 2 - Redirect User to website of trusted party to authenticate
+				- Step 3 - User logs in on trusted party's website
+				- Step 4 - (one-time/website) User reviews / grants permissions you're requesting
+				- Step 5 - Receive Authorization Code, (AuthCode) from third party website, confirming User
+				- Step 6 - (one-time/website) Exchange AuthCode for Access Token
+					- Store in db to access user's third-party account to retrieve any User-granted info without User
+			- Using passport module
+				- (See Level 5 for initial passport installation and configuration)
+				- Pick Passport "Strategy" for website you want to authorize with from passportjs.org
+					- Install Passport strategy module shown for the desired website, (i.e. passport-google-oauth)
+						- i.e. "npm install passport-google-oauth20"
+					- And mongoose-findorcreate module to make registering or logging in a single command, (akin to upsert)
+						- (Passport strategy docs show a .findOrCreate pseudocode method that doesn't actually exist to just tell you you have to implement this functionality.  Luckily, someone simply turned the pseudocode call into an actual module so that you don't ;)  )
+						- i.e. "npm install mongoose-findorcreate"
+						- "const findOrCreate = require('mongoose-findorcreate');"
+							- (Note: this module seems to insist on the const explicitly being named "findOrCreate".  Any other name, i.e. "find_or_create", comes back with an "is not a function" error.)
+						- (After "const [Mongoose Schema Name] = new mongoose.Schema({ ..." )  // Creating the schema
+							- 	"[Mongoose Schema Name].plugin(findOrCreate);"
+								- i.e. "user_schema.plugin(findOrCreate);"
+					- Setup Oauth access on developer section of third party authorization website
+						- i.e. https://console.developers.google.com/
+							- Create new project
+							- Go to Credentials
+							- "Configure Consent Screen"
+								- "External" -> Create
+								- Fill in page, (i.e. Application name, logo, support email, etc)
+								- If you want more than the default email/profile/openid, click "Add Scope" and do whatever's needed to add additionally-requested info
+							- Go back to Credentials
+								- "Create Credentials" > OAuth client ID
+									- Fill in info, especially:
+										- "Authorized JavaScript origins," (the page that will be making the request to Google)
+										- "Authorized redirect URIs," (the page you want Google to send the user to after authenticating)
+									- Will give you "Client ID" and "Client Secret" codes
+										- Add to .env file
+					- Configure Strategy
+						- "const Google_Strategy = require('passport-google-oauth20').Strategy;"
+						- (After "passport.deserializeUser([Mongoose Model Name].deserializeUser());")
+							- 	"passport.use(new Google_Strategy({
+										clientID: process.env.GOOGLE_CLIENT_ID,
+										clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+										callbackURL: process.env.BASE_URL_DEV + process.env.PORT + '/auth/google/secrets'   // Swap to BASE_URL_PROD when releasing
+									}, 
+									function(accessToken, refreshToken, profile, cb) {
+										User.findOrCreate({ googleId: profile.id }, function (err, user) {
+											return cb(err, user);
+										});
+									}
+								));"
+					- Authenticate Requests
+						- 	"app.get('/auth/google',
+								passport.authenticate('google', { scope: ['profile'] })
+							);
+						-   "app.get([Google Authorized redirect URIs],
+						 		// i.e. "app.get('/auth/google/secrets',   
+								passport.authenticate('google', { failureRedirect: '/login' }),
+								function(req, res) {
+									res.redirect('/[Whatever route is for your authenticated users only]');
+										// i.e. res.redirect('/secrets');
+								}
+							);
+					- Store Google ID to database to function as an alternate user id for all data created on our site
+						- Since the third-party Oauth'd user won't have a local email address to store and use in the future
+							- And apparently Google doesn't send in their profile.
+						- Add "googleId: String" to schema
