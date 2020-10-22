@@ -1194,3 +1194,188 @@
 						- Since the third-party Oauth'd user won't have a local email address to store and use in the future
 							- And apparently Google doesn't send in their profile.
 						- Add "googleId: String" to schema
+	- React, (/JSX)
+		- Front-end Framework
+			- Combine HTML, CSS and JS into each component
+			- Each component listens for and performs its own updates without requiring full page reloads.
+		- Installation
+			- (There are multiple options here, none of which do a good job of following the normal "npm install [only_the_package(s)_that_I_actually_want]" format, then additions of import/const in [package.json "main" js file], and finally showing you how to setup the required bits so that you actually understand how to use)
+				- OPTION 1 - Direct Module Install / HTML embedding
+					- This is the closest to normal installation, but is incomplete, as it doesn't include routing or hot reloads
+						- I may, at some point, add the additional bits to install and configure here, but unfortunately, it's not a trivial exercise to do it all by hand, so we'll see.
+					- In html/ejs file, (in a publicly-accessible directory)
+						- "<div id="root"></div>"   // Will be what we update for all React code.
+							- id="root" is just a convention, can certainly update other bits of the DOM if you'd rather
+						- "<script src="[package.json "main" js file]" type="text/jsx"></script>"
+							- (Note: Some people use type="text/babel" instead of "text/jsx")
+								- ("text/jsx" just says that the file is jsx and needs a non-specified "transpiler" - i.e. a translator - to convert its contents to regular js)
+									- (Through external config files, this transpiler will generally be configured to be Babel - babeljs.io - anyway)
+										- (Thus, "text/jsx" and "text/babel" - the latter of which specifically calls the Babel transpiler - end up generally being functionally equivalent)
+											- (So, either use "text/jsx" and change the configured transpiler outside of the file, if you want)
+												- (Or, just set "text/[direct transpiler name]" - i.e. "text/babel" inside the file, whichever makes you happier)
+					- "npm install react react-dom"
+					- In [package.json "main" js file]
+						- (which, for some reason, wants to be inside a "src" subdirectory in your project directory)
+						- "import React from 'react';" OR "const React = require('react');"  // The first way is the newer ES6+ way, but both ways work.
+							- (Seems to be a need to capitalize "React", even if doing in the Node.js / const/require way)
+						- "import ReactDOM from 'react-dom';" OR "const ReactDOM = require('react-dom');"  // The first way is the newer ES6+ way, but both ways work.
+							- (Seems to be a need to capitalize / smush "ReactDOM", even if doing in the Node.js / const/require way)
+				- OPTION 2 - Create React App  //  Most common way to begin to learn React
+					- (NOTE: WILL NOT WORK ON non-Linux disk partitions - due to React scripts with relative paths to symlinked file locations, this option WILL NOT WORK on an non-Linux disk partition)
+						- (Even with the usual "rsync -avL node_modules" workaround)
+					- (Takes 5-10+ minutes to install for a single-page only website)
+					- From outside of the project directory for [the name of your React application]
+						- "npx create-react-app [the name of your React application]"
+							- (Will spend literally 5-10+ minutes creating a new project directory named [the name of your React application], installing a whole mess of modules, and filling that project directory with a whole mess of files, several of which you'll probably just delete)
+						- "cd [the name of your React application]"
+						- "npm start"
+							- (Starts app at localhost:3000, and will also automatically open a browser window to that location)
+						- In [the name of your React application]/public  // OPTION 1 "In html/ejs file..." equivalent
+							- Delete all files
+							- Add "index.html" with standard HTML starter tags
+								- "<div id="root"></div>"   // Will be what we update for all React code.
+									- id="root" is just a convention, can certainly update other bits of the DOM if you'd rather
+								- "<script src="[package.json "main" js file]" type="text/jsx"></script>"
+									- i.e. "<script src="../src/index.js" type="text/jsx"></script>"
+									- (Note: Some people use type="text/babel" instead of "text/jsx")
+										- ("text/jsx" just says that the file is jsx and needs a non-specified "transpiler" - i.e. a translator - to convert its contents to regular js)
+											- (Through external config files, this transpiler will generally be configured to be Babel - babeljs.io - anyway)
+												- (Thus, "text/jsx" and "text/babel" - the latter of which specifically calls the Babel transpiler - end up generally being functionally equivalent)
+													- (So, either use "text/jsx" and change the configured transpiler outside of the file, if you want)
+														- (Or, just set "text/[direct transpiler name]" - i.e. "text/babel" inside the file, whichever makes you happier)
+						- In [the name of your React application]/src
+							- Delete all files
+							- Add [package.json "main" js file] // i.e. "index.js"
+								- "import React from 'react';" OR "const React = require('react');"  // The first way is the newer ES6+ way, but both ways work.
+									- (Seems to be a need to capitalize "React", even if doing in the Node.js / const/require way)
+								- "import ReactDOM from 'react-dom';" OR "const ReactDOM = require('react-dom');"  // The first way is the newer ES6+ way, but both ways work.
+									- (Seems to be a need to capitalize / smush "ReactDOM", even if doing in the Node.js / const/require way)
+				- OPTION 3 - Next.js  //  Most common way to build production React applications
+					- (NOTE: WILL NOT WORK ON non-Linux disk partitions - due to React scripts with relative paths to symlinked file locations, this option WILL NOT WORK on an non-Linux disk partition)
+						- (Even with the usual "rsync -avL node_modules" workaround)
+					- (Similar in function to Option 2, but, at least, it's 1-2 mins vs 5-10+, and it's useful for more than a single page website)
+					- From outside of the project directory for [the name of your React application]
+						- "npx create-next-app [the name of your React application]"
+						- "cd [the name of your React application]"
+						- "npm run dev"
+							- (Starts app at localhost:3000)
+						
+		- Use
+			- In [package.json "main" js file]
+				- "ReactDOM.render([single standard html element], [part of the DOM you want to update with React code, expressed in standard javascript]);"
+					- [single standard html element] can be a <div>
+						- Which is how you send more than a single html tag via react, i.e.
+							- 	"ReactDOM.render(
+									<div>
+										<h1>This is a header</h1>
+										<ul>
+											<li>Item 1</li>
+											<li>Item 2</li>
+											<li>Item 3</li>
+										</ul>
+									</div>,
+									document.getElementById('root')  // [part of the DOM you want to update with React code, expressed in standard javascript]
+								);"
+						- Can also contain javascript expressions (only) inside HTML
+							- (Expressions produce a value - i.e. a + b, the Math.floor expression below, etc)
+							- By surrounding javascript calls with {}, i.e.:
+								- 	"const name = 'Sabrina';"
+									"ReactDOM.render(
+										<div>
+											<h1>Hello {name}!</h1>
+											<p>Your lucky number is {Math.floor(Math.random() * 10)}</p>  // Note: don't include ";" between "...10)" and "}"
+										</div>,
+										document.getElementById('root')
+									);"
+									- Which renders as
+										"<div>
+											<h1>Hello Sabrina</h1>
+											<p>Your lucky number is [whatever number was generated]</p>
+										</div>"
+							- Cannot use javascript statements
+								- (Statements perform an action - i.e. loops, if...then...else)
+			- React-required adjustments to using HTML attributes, (CSS styling, etc)
+				- Because the HTML is inside a javascript file instead of an HTML file
+					- Instead of "class=" (HTML) you have to use "className=" (javascript)
+					- Multi-word HTML attributes, (i.e. "contenteditable", "font-size") need to use camelCase instead, (i.e. "contentEditable", "fontSize")
+					- HTML attributes that take multi-word string arguments, (i.e. 'style="color: red; font-size: 30px;"') need to use javascript objects instead, (i.e. "style={{color: "red", fontSize: "30px"}}")
+						- Note the double curly braces
+							- The outer pair is to signify that you're inserting javascript
+							- The inner pair is for opening / closing the javascript object itself
+			- Components
+				- Way of breaking up page into multiple, independent, sections
+				- Place each segment of HTML/JS that you want to turn into a component into a function, with the "return" set to the HTML/JS
+					- CRITICAL NOTE: the name of the function HAS TO have the first letter capitalized for this to work
+					-	i.e.	"function Heading() {
+									return <h1>This is my heading</h1>
+								}"
+
+								"function List() {
+									return <ul>
+										<li>Item 1</li>
+										<li>Item 2</li>
+										<li>Item 3</li>
+									</ul>
+								}"
+				- Replace the appropriate location in the ReactDOM.render HTML with the name of your function, with the first letter capitalized, as an empty, self-closing, HTML tag
+					- i.e.	"ReactDOM.render(
+								<div>
+									<h1>This is my heading</h1>
+									<ul>
+										<li>Item 1</li>
+										<li>Item 2</li>
+										<li>Item 3</li>
+									</ul>
+									<p>Random other paragraph</p>
+								</div>,
+								document.getElementById('root')
+							);"
+
+							with the two above functions, (i.e. "Heading" and "List") becomes
+
+							"ReactDOM.render(
+								<div>
+									<Heading />
+									<List />
+									<p>Random other paragraph</p>
+								</div>,
+								document.getElementById('root')
+							);"
+				- As with any other javascript functions, can move component functions to an external file to clean up [package.json "main" js file]
+					- Create external file - [whatever name you want].js  // Some folks would prefer the file extension be .jsx or .mjs since the file will contain other than standard javascript
+					- In [whatever name you want].js
+						- Since the components will include React bits
+							- "import React from 'react';" OR "const React = require('react');"  // The first way is the newer ES6+ way, but both ways work.
+						- Add any function definitions you want, tagging any functions you want to be externally-accessible with the "export" keyword
+							- i.e.	"export function Heading() { ..."  // "export" keyword included, so Externally-accessible
+
+									"export function List() { ..."  // "export" keyword included, so Externally-accessible
+
+									"function List_Helper() { ..."  // "export" keyword not included, so Not Externally-accessible
+						- Define the default function, even if there is only one function in the file
+							- i.e. "export default Heading;"
+					- In [package.json "main" js file]
+						- "import {[array of the functions you want to access, or "* as [Alias]" if you want to access them all]} from "[relative path to "[whatever name you want].js".  File extension does not need to be included, but can be]"
+							- i.e. "import { Heading, List } from "./modules";"
+								- (If you still have the original functions in [package.json "main" js file], make sure to delete them / comment them out)
+									(To avoid an error for having two identically-named functions - one in [package.json "main" js file] and one in [whatever name you want].js)
+									- Namespaces
+										- For when using "*" instead of named functions
+											- If you're importing * from two external module files, (or [package.json "main" js file] and one external file, as above) and both of those module files have functions named "Jump", for example
+												- You need to be able to say whether you want to use the Jump function in [File1] or the Jump function in [File2]
+													- You can, (and have to) do so by using the "as [Alias]" phrase in the import statement
+														- i.e.	"import * as Big from "./[File1].js";"
+																"import * as Small from "./[File2].js";"
+														- You would then access Jump from [File1] as "Big.Jump()"
+															- And Jump from [File2] as "Small.Jump()"
+										- For when using named functions instead of "*"
+											- Unfortunately, in Javascript, it doesn't quite work the same when asking for specific named functions
+												- Instead of being able to use the above "* as [Alias]" syntax
+													- (i.e. "import {Jump, Dance} as Big from "./[File1].js";", and then accessing as "Big.Jump()" and "Big.Dance()") as would be expected)
+													- The best you can do is pretend-emulate for each named function
+														- i.e. 	"import {Jump as BigJump, Dance as BigDance} from "./[File1].js";"
+																"import {Jump as SmallJump, Dance as SmallDance} from "./[File2].js";"
+																- (Note: You cannot even use "... Jump as Big.Jump ...", as that's an error)
+														- You would then have to access Jump from [File1] as "BigJump()"  // No periods
+															- And Jump from [File2] as "SmallJump()"  // No periods
+						
