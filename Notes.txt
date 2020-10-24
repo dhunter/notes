@@ -1307,7 +1307,7 @@
 				- Place each segment of HTML/JS that you want to turn into a component into a function, with the "return" set to the HTML/JS
 					- CRITICAL NOTE: the name of the function HAS TO have the first letter capitalized for this to work
 					-	i.e.	"function Heading() {
-									return <h1>This is my heading</h1>
+									return <h1>This is my heading</h1>;
 								}"
 
 								"function List() {
@@ -1315,7 +1315,7 @@
 										<li>Item 1</li>
 										<li>Item 2</li>
 										<li>Item 3</li>
-									</ul>
+									</ul>;
 								}"
 				- Replace the appropriate location in the ReactDOM.render HTML with the name of your function, with the first letter capitalized, as an empty, self-closing, HTML tag
 					- i.e.	"ReactDOM.render(
@@ -1378,4 +1378,62 @@
 																- (Note: You cannot even use "... Jump as Big.Jump ...", as that's an error)
 														- You would then have to access Jump from [File1] as "BigJump()"  // No periods
 															- And Jump from [File2] as "SmallJump()"  // No periods
+				- Props, (/Properties)
+					- Used to make React functions, (/ components) modular
+						- Can have one "Person" function, (/ component) with the info for multiple people
+							- i.e.	"<Person name="Ed" age=12 />"
+									"<Person name="Julia" age=35 />"
+									"<Person name="Herman" age=26 />
+								- Can also externalize values into an array of javascript objects
+									- i.e. people = [{name: "Ed", age: 12}, {name: "Julia", age: 35}, {name: "Herman", age: 26}]
+										- (Can also then move this array into an external file, if you want)
+											- (And then re-access by "import"ing the array from the external file)
+									- And access as:
+										"<Person name={people[0].name} age={people[0].age} />"
+										"<Person name={people[1].name} age={people[1].age} />"
+										"<Person name={people[2].name} age={people[2].age} />"
+						- Can use in the function definition by specifying the name for a javascript object taken as an argument
+							- Traditionally, the name used is "props", (as in "properties")
+							- i.e. function Person(props) { ...
+								- Access via props.[attribute name]
+									- i.e. "props.name", "props.age"
+									- (Surrounded by {}, as needed for javascript bits)
+										- i.e.	"function Person(props) {
+													return 	<div>
+																<h2>{props.name</h2>
+																<p>Age: {props.age}</p>
+															</div>;
+												}"
+					- .map function
+						- Used to create multiple React components from an array of javascript objects with a single command
+							- Instead of having to manually create <Person name={people[X].name} age={people[X].age} for all objects in the people array
+								- Create one function to define the relations between the values in the array and your component
+									- i.e.	"function Create_Person(person) {  // Lower-case "person" is just a variable name, could be any string you want
+												return <Person name={person.name} age={person.age} />;  // Where "name" and "age" are the object attributes in the array
+											}"
+										- (Note: React gets ornery, if a unique key, (with an explicit "key={[some field]}" attribute) is not defined before using .map
+											- (Will still function, but will show a warning in React Developer Tools)
+												- (If you want to make this warning go away)
+													- (You will need to:  )
+														- (Alter the initial array to ensure it has a unique key field, if it doesn't already have one)
+															- (e.g. The previous "people" array:  )
+																- ("people = [{name: "Ed", age: 12}, {name: "Julia", age: 35}, {name: "Herman", age: 26}]")
+															- (Becomes:  )
+																- ("people = [{id: 1, name: "Ed", age: 12}, {id: 2, name: "Julia", age: 35}, {id: 3, name: "Herman", age: 26}]")
+														- (And add a "key=" attribute to the Create_Person function definition)
+															- (i.e.	"function Create_Person(person) {  )
+																	(	return <Person key={person.id} name={person.name} age={person.age} />;  )
+															(		}"
+														- (NOTE: React explicitly defines this "key=" attribute as NOT a property, (/prop) of the objects in the array)
+															- (And thus, does not allow it to be referenced as would otherwise be expected)
+																- (i.e. "{person.id}")
+															- (Thus, you can't simply specify one of the extant fields as a key, ("key=") )
+																- (Even if the values in that field are, and should always be, unique)
+																	- (i.e.	"function Create_Person(person) {  )
+																			(	return <Person key={person.name} age={person.age} />;  // was "name={person.name}") 
+																	(		}"
+																	- (If you ever want to access the values of that attribute)
+								- Call the .map function wherever you want all instances of your component to appear
+									- i.e. 	"{people.map(Create_Person)}"  // Making sure it's wrapped in curly braces
+									- Will create one instance of "<Person ..." for each object in the people array.
 						
