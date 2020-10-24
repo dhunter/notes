@@ -1414,7 +1414,18 @@
 										- (Note: React gets ornery, if a unique key, (with an explicit "key={[some field]}" attribute) is not defined before using .map
 											- (Will still function, but will show a warning in React Developer Tools)
 												- (If you want to make this warning go away)
-													- (You will need to:  )
+													- (You will need to either:  )
+														- (Specify one of the extant fields as a key, ("key=") )
+															- (If the values in that field are, and should always be, unique)
+															- (Note: React explicitly defines this "key=" attribute as NOT a property, (/prop) of the objects in the array)
+																- (And thus, does not allow it to be referenced as would otherwise be expected)
+																	- (i.e. "{person.id}")
+																	- (So you need to double-declare the attribute, once as "key=" and a second time as "[whatever you would have otherwise named it - i.e. "name" ]=" to be able to access that attribute)
+																		- (Using the non-"key=" name to access as a property)
+																			- (i.e.	"function Create_Person(person) {  )
+																					(	return <Person key={person.name} name={person.name} age={person.age} />;  ) 
+																			(		}"
+													- (Or:  )
 														- (Alter the initial array to ensure it has a unique key field, if it doesn't already have one)
 															- (e.g. The previous "people" array:  )
 																- ("people = [{name: "Ed", age: 12}, {name: "Julia", age: 35}, {name: "Herman", age: 26}]")
@@ -1424,15 +1435,6 @@
 															- (i.e.	"function Create_Person(person) {  )
 																	(	return <Person key={person.id} name={person.name} age={person.age} />;  )
 															(		}"
-														- (NOTE: React explicitly defines this "key=" attribute as NOT a property, (/prop) of the objects in the array)
-															- (And thus, does not allow it to be referenced as would otherwise be expected)
-																- (i.e. "{person.id}")
-															- (Thus, you can't simply specify one of the extant fields as a key, ("key=") )
-																- (Even if the values in that field are, and should always be, unique)
-																	- (i.e.	"function Create_Person(person) {  )
-																			(	return <Person key={person.name} age={person.age} />;  // was "name={person.name}") 
-																	(		}"
-																	- (If you ever want to access the values of that attribute)
 								- Call the .map function wherever you want all instances of your component to appear
 									- i.e. 	"{people.map(Create_Person)}"  // Making sure it's wrapped in curly braces
 									- Will create one instance of "<Person ..." for each object in the people array.
