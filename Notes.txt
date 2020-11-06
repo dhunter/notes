@@ -269,6 +269,90 @@
 				- i.e. in above Person definition, add:
 					- this.[method_name] = function() {[function definition]}
 				- To use for person_1, would just be "person_1.[method_name]()"
+		- Functional Programming operations, (map/filter/reduce & find/findIndex)
+			- .map function
+				- (Has significant application in React - see ".map in React" section below)
+				- Used to apply a function to each member of an array without explicit looping
+					- For a given array and function definition
+						- (So long as they're logically relatable - i.e. an array of ints and a mathematical function, an array of strings and a string manipulation function, etc) 
+						- [Array Name].map([Function Name]) will apply [Function Name] to each member of [Array Name]
+							- i.e. 	"function double(x) {
+										return x * 2;
+									}"
+									"const numbers = [2, 12, 25, 3, 1]"
+
+									"numbers.map(double);" // yields [4, 24, 50, 6, 2]
+			- .filter function
+				- Returns only values that fit a [Defined Condition]
+				- Works fundamentally the same as .map
+					- (Array and function definition, logically relatable, apply .filter to the array, etc)
+					- Expects the function, (i.e. the [Defined Condition]) to resolve to a boolean True or False
+						- Returns only values where the function evaluates to True
+							- i.e. 	"function less_than_10(x) {
+										return x < 10;
+									}"
+
+									"numbers.filter(less_than_10);" // yields [2, 3, 1]
+
+									"function greater_than_or_equal_to_10(x) {
+										return x >= 10;
+									}"
+
+									"numbers.filter(greater_than_or_equal_to_10);" // yields [12, 25]"
+			- .reduce function
+				- Converts an array to a single value by applying a function
+				- Works like .map and .filter
+					- Expects the function to define how to combine members of an array
+						- Via an intermediate value during processing, (i.e. "accumulator")
+							- i.e.	"function add_all_together(accumulator, current_number) {
+										return accumulator + current_number;
+									}"
+
+									"numbers.reduce(add_all_together);" // yields 43
+								- (If curious, starts by automatically setting accumulator = array[0], current_number to array[1])
+									(Then sets accumultor = return value, current_number to array[2], etc)
+			- .find function
+				- Returns first value in an array that matches [Defined Condition]
+					- i.e. 	"numbers.find(less_than_10);" // yields 2
+			- .findIndex function
+				- Returns index of first value in an array that matches [Defined Condition]
+					- i.e.	"numbers.findIndex(less_than_10);" // yields 0
+		- Arrow Notation, (/ Arrow Functions / "Fat Arrow" / "=>")
+			- Way of shortening function definitions
+				- From longest to shortest:
+					- Named function -> function double(x) {return x * 2}
+						- Delete function name to get:
+							- Anonymous function -> function (x) {return x * 2}
+								- Delete function keyword to get:
+									- (x) => {return x * 2}
+										- If function takes only one parameter:
+											- x => {return x * 2}
+										- If function has a single-line return statement, delete return keyword and brackets to get:
+											- x => x * 2
+											- (Note: can still use this return line simplification even if the function takes more than one parameter)
+				- Often used to simplify Functional Programming operations, (i.e. map/filter/reduce)
+					- So:
+						- Instead of using:
+							"function double(x) {
+								return x * 2;
+							}"
+
+							"numbers.map(double);" // yields [4, 24, 50, 6, 2]
+						- You just use:
+							"numbers.map(x => x * 2);"// yields [4, 24, 50, 6, 2]
+					- Or:
+						- Instead of using:
+							"function less_than_10(x) {
+								return x < 10;
+							}"
+
+							"numbers.filter(less_than_10);" // yields [2, 3, 1]
+						- You just use:
+							"numbers.filter(x => x < 10);" // yields [2, 3, 1]
+					- (Note for .reduce)
+						- (Since you need to explicitly specify an accumulator parameter in addtion to the regular parameter)
+							- (The shortest you can get to is:)
+								- ("numbers.reduce((accumulator, current_number) => accumulator + current_number);")
 		- Javascript Quirks
 			- Scope
 				- Javascript has 3 concepts of scope for 3 types of assignments:
@@ -301,6 +385,12 @@
 					- You can actually make [object name] immutable after the const assignment
 						- By adding Object.freeze([object name])
 				- For maximum similarity to other languages, don't use "const" keyword if the array or object isn't really immutable
+			- ";" usage at end-of-lines erratic / without value?
+				- Can often either include an end-of-line semi-colon, or not, with no demonstrable effect on code function either way
+					- And yet, ";" end-of-line is still generally preferred... sometimes...
+						- Presume there's some actual syntactic value to it being there
+							- But have yet to figure out in what situations that value actually exists
+								- As I've yet to have something not work due to ";" inclusion or omission
 		- jQuery
 			- (Loaded via hosted library, akin to Bootstrap)
 				- (i.e. <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>)
@@ -1404,14 +1494,24 @@
 																<p>Age: {props.age}</p>
 															</div>;
 												}"
-					- .map function
-						- Used to create multiple React components from an array of javascript objects with a single command
+					- .map in React
+						- Can be used to create multiple React components from an array of javascript objects with a single command
 							- Instead of having to manually create <Person name={people[X].name} age={people[X].age} for all objects in the people array
-								- Create one function to define the relations between the values in the array and your component
+								- Initial Setup, (/Confirmation)
+									- Create (/Confirm that you have) the [Initial Function] to be used, with props
+										- i.e.	"function Person(props) {
+													return 	<div>
+																<h2>{props.name</h2>
+																<p>Age: {props.age}</p>
+															</div>;
+												}"
+									- Create (/Confirm that you have) an [Array of Javascript Objects] to be mapped to the [Initial Function]
+										- i.e. people = [{name: "Ed", age: 12}, {name: "Julia", age: 35}, {name: "Herman", age: 26}]
+								- Create a [Second, Mapping Function] to define the relations between the values in the [Array of Javascript Objects] and the [Initial Function]
 									- i.e.	"function Create_Person(person) {  // Lower-case "person" is just a variable name, could be any string you want
 												return <Person name={person.name} age={person.age} />;  // Where "name" and "age" are the object attributes in the array
 											}"
-										- (Note: React gets ornery, if a unique key, (with an explicit "key={[some field]}" attribute) is not defined before using .map
+										- (Note: React gets ornery, if you don't define a unique key, (with an explicit "key={[some field]}" attribute) is not defined before using .map
 											- (Will still function, but will show a warning in React Developer Tools)
 												- (If you want to make this warning go away)
 													- (You will need to either:  )
@@ -1435,7 +1535,14 @@
 															- (i.e.	"function Create_Person(person) {  )
 																	(	return <Person key={person.id} name={person.name} age={person.age} />;  )
 															(		}"
-								- Call the .map function wherever you want all instances of your component to appear
-									- i.e. 	"{people.map(Create_Person)}"  // Making sure it's wrapped in curly braces
-									- Will create one instance of "<Person ..." for each object in the people array.
-						
+								- Call the .map function on the [Array of Javascript Objects] wherever you want the instances of the [Initial Function] to appear
+									- Pass the [Second, Mapping Function] as the argument to the .map function
+										- i.e. 	"{people.map(Create_Person)}"
+									- Will create one instance of the [Initial Function], (i.e. "<Person ...") for each object in the [Array of Javascript Objects], (i.e. "people").
+									- Could also do as a single statement with Arrow Notation
+										- i.e. 	"{people.map(person => (
+													<Person
+														name={person.name}
+														age={person.age}
+													/>
+												))}"
