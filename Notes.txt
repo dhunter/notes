@@ -353,6 +353,27 @@
 						- (Since you need to explicitly specify an accumulator parameter in addtion to the regular parameter)
 							- (The shortest you can get to is:)
 								- ("numbers.reduce((accumulator, current_number) => accumulator + current_number);")
+		- Destructuring, (ES6)
+			- Way of assigning multiple variables concurrently to multiple values in an array or object
+				- If values are in an array
+					- Can use any variable names you want
+						- i.e. 	"const [red, green, blue] = [9, 132, 227];"  // red = 9, green = 132, blue = 227
+					- If the number of variable names < number of items in the array
+						- Will assign values up to the number of variable names in your definition
+							- i.e. 	"const [red, green] = [9, 132, 227];"  // red = 9, green = 132; no variable is assigned to the value 227
+				- If values are in an object
+					- i.e. 	"const animal_one = {"name": "cat", "sound": "meow"};"  // [Given Object #1]
+						- Can either use the key names already used in the object
+							- i.e. 	"const { name, sound } = animal_one;  // name = cat, sound = meow
+						- Or define an alias for any keys desired
+							- i.e. 	"const { name: red, sound: green } = animal_one;  // red = "cat", green = "meow"
+						- Can also define default values
+							- "const { name = "Fluffy", sound = "Purr" } = animal_one;  // if cat/meow exists in the object, name = "cat", sound = "meow".  If it doesn't, name = "Fluffy", sound = "Purr"
+					- Can, (but don't have to) nest the level of destructured variables to the levels in the object
+						- i.e. 	"const animal_two = {"name": "cat", "sound": "meow", "feedingRequirements": {"food": 2, "water": 3}};  // [Given Object #2]
+								"const { name, sound, feedingRequirements: { food, water }} = animal_two;"  // name = "cat", sound = "meow", food = 2, water = 3
+								- (Can also ignore nested objects, and assignment still works for the non-nested key values)
+									(i.e. 	"const { name, sound } = animal_two;  //  name = cat, sound = meow;  Note "= animal_two", it's using [Given Object #2], the one with the nested object "feedingRequirements", rather than [Given Object #1], the one with no nested object, and it still works	
 		- Javascript Quirks
 			- Scope
 				- Javascript has 3 concepts of scope for 3 types of assignments:
@@ -385,12 +406,17 @@
 					- You can actually make [object name] immutable after the const assignment
 						- By adding Object.freeze([object name])
 				- For maximum similarity to other languages, don't use "const" keyword if the array or object isn't really immutable
-			- ";" usage at end-of-lines erratic / without value?
-				- Can often either include an end-of-line semi-colon, or not, with no demonstrable effect on code function either way
-					- And yet, ";" end-of-line is still generally preferred... sometimes...
-						- Presume there's some actual syntactic value to it being there
-							- But have yet to figure out in what situations that value actually exists
-								- As I've yet to have something not work due to ";" inclusion or omission
+			- Unenforced Elements 
+				- ";" usage at end-of-lines not enforced
+					- Can often either include an end-of-line semi-colon, or not, with no demonstrable effect on code function either way
+						- And yet, ";" end-of-line is still generally preferred... sometimes...
+							- Presume there's some actual syntactic value to it being there
+								- But have yet to figure out in what situations that value actually exists
+									- As I've yet to have something not work due to ";" inclusion or omission
+				- Quoted keynames in javascript objects not enforced
+					- {key1: "string_value_1", key2: numeric_value_2} is pretty much functionally equivalent to:
+						- {"key1": "string_value_1", "key2": numeric_value_2}
+							- Even though the "key" form, (with the quotes - i.e. where the key name itself is a string) is supposed to be the proper form.
 		- jQuery
 			- (Loaded via hosted library, akin to Bootstrap)
 				- (i.e. <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>)
@@ -1475,7 +1501,7 @@
 									"<Person name="Julia" age=35 />"
 									"<Person name="Herman" age=26 />
 								- Can also externalize values into an array of javascript objects
-									- i.e. people = [{name: "Ed", age: 12}, {name: "Julia", age: 35}, {name: "Herman", age: 26}]
+									- i.e. people = [{"name": "Ed", age: 12}, {"name": "Julia", "age": 35}, {"name": "Herman", "age": 26}]
 										- (Can also then move this array into an external file, if you want)
 											- (And then re-access by "import"ing the array from the external file)
 									- And access as:
@@ -1494,55 +1520,121 @@
 																<p>Age: {props.age}</p>
 															</div>;
 												}"
-					- .map in React
-						- Can be used to create multiple React components from an array of javascript objects with a single command
-							- Instead of having to manually create <Person name={people[X].name} age={people[X].age} for all objects in the people array
-								- Initial Setup, (/Confirmation)
-									- Create (/Confirm that you have) the [Initial Function] to be used, with props
-										- i.e.	"function Person(props) {
-													return 	<div>
-																<h2>{props.name</h2>
-																<p>Age: {props.age}</p>
-															</div>;
-												}"
-									- Create (/Confirm that you have) an [Array of Javascript Objects] to be mapped to the [Initial Function]
-										- i.e. people = [{name: "Ed", age: 12}, {name: "Julia", age: 35}, {name: "Herman", age: 26}]
-								- Create a [Second, Mapping Function] to define the relations between the values in the [Array of Javascript Objects] and the [Initial Function]
-									- i.e.	"function Create_Person(person) {  // Lower-case "person" is just a variable name, could be any string you want
-												return <Person name={person.name} age={person.age} />;  // Where "name" and "age" are the object attributes in the array
+				- .map in React
+					- Can be used to create multiple React components from an array of javascript objects with a single command
+						- Instead of having to manually create <Person name={people[X].name} age={people[X].age} for all objects in the people array
+							- Initial Setup, (/Confirmation)
+								- Create (/Confirm that you have) the [Initial Function] to be used, with props
+									- i.e.	"function Person(props) {
+												return 	<div>
+															<h2>{props.name</h2>
+															<p>Age: {props.age}</p>
+														</div>;
 											}"
-										- (Note: React gets ornery, if you don't define a unique key, (with an explicit "key={[some field]}" attribute) is not defined before using .map
-											- (Will still function, but will show a warning in React Developer Tools)
-												- (If you want to make this warning go away)
-													- (You will need to either:  )
-														- (Specify one of the extant fields as a key, ("key=") )
-															- (If the values in that field are, and should always be, unique)
-															- (Note: React explicitly defines this "key=" attribute as NOT a property, (/prop) of the objects in the array)
-																- (And thus, does not allow it to be referenced as would otherwise be expected)
-																	- (i.e. "{person.id}")
-																	- (So you need to double-declare the attribute, once as "key=" and a second time as "[whatever you would have otherwise named it - i.e. "name" ]=" to be able to access that attribute)
-																		- (Using the non-"key=" name to access as a property)
-																			- (i.e.	"function Create_Person(person) {  )
-																					(	return <Person key={person.name} name={person.name} age={person.age} />;  ) 
-																			(		}"
-													- (Or:  )
-														- (Alter the initial array to ensure it has a unique key field, if it doesn't already have one)
-															- (e.g. The previous "people" array:  )
-																- ("people = [{name: "Ed", age: 12}, {name: "Julia", age: 35}, {name: "Herman", age: 26}]")
-															- (Becomes:  )
-																- ("people = [{id: 1, name: "Ed", age: 12}, {id: 2, name: "Julia", age: 35}, {id: 3, name: "Herman", age: 26}]")
-														- (And add a "key=" attribute to the Create_Person function definition)
-															- (i.e.	"function Create_Person(person) {  )
-																	(	return <Person key={person.id} name={person.name} age={person.age} />;  )
-															(		}"
-								- Call the .map function on the [Array of Javascript Objects] wherever you want the instances of the [Initial Function] to appear
-									- Pass the [Second, Mapping Function] as the argument to the .map function
-										- i.e. 	"{people.map(Create_Person)}"
-									- Will create one instance of the [Initial Function], (i.e. "<Person ...") for each object in the [Array of Javascript Objects], (i.e. "people").
-									- Could also do as a single statement with Arrow Notation
-										- i.e. 	"{people.map(person => (
-													<Person
-														name={person.name}
-														age={person.age}
-													/>
-												))}"
+								- Create (/Confirm that you have) an [Array of Javascript Objects] to be mapped to the [Initial Function]
+									- i.e. people = [{"name": "Ed", "age": 12}, {"name": "Julia", "age": 35}, {"name": "Herman", "age": 26}]
+										- (If in an external file, make sure you use const and export default)
+											- (i.e. 	const people = [
+															{
+																"name": "Ed",
+																"age": 12
+															},
+															{
+																"name": "Julia",
+																"age": 35
+															},
+															{
+																"name": "Herman",
+																"age": 26
+															}
+														];
+														
+														export default people;)
+							- Create a [Second, Mapping Function] to define the relations between the values in the [Array of Javascript Objects] and the [Initial Function]
+								- i.e.	"function Create_Person(person) {  // Lower-case "person" is just a variable name, could be any string you want
+											return <Person key={person.name} name={person.name} age={person.age} />;  // Where "name" and "age" are the object attributes in the array
+										}"
+									- (Note: React gets ornery, if you don't define a unique key, (with an explicit "key={[some field]}" attribute) before using .map)
+										- (Will still function, but will show a warning in React Developer Tools)
+											- (If you want to make this warning go away)
+												- (You will need to either:  )
+													- (Specify one of the extant fields as a key, ("key=") )
+														- (If the values in that field are, and should always be, unique)
+														- (Note: React explicitly defines this "key=" attribute as NOT a property, (/prop) of the objects in the array)
+															- (And thus, does not allow it to be referenced as would otherwise be expected)
+																- (i.e. "{person.id}")
+																- (So you need to double-declare the attribute, once as "key=" and a second time as "[whatever you would have otherwise named it - i.e. "name" ]=" to be able to access that attribute)
+																	- (Using the non-"key=" name to access as a property)
+																		- (i.e.	"function Create_Person(person) {  )
+																				(	return <Person key={person.name} name={person.name} age={person.age} />;  ) 
+																		(		}"
+												- (Or:  )
+													- (Alter the initial array to ensure it has a unique key field, if it doesn't already have one)
+														- (e.g. The previous "people" array:  )
+															- ("people = [{"name": "Ed", "age": 12}, {"name": "Julia", "age": 35}, {"name": "Herman", "age": 26}]")
+														- (Becomes:  )
+															- ("people = [{"id": 1, "name": "Ed", "age": 12}, {"id": 2, "name": "Julia", "age": 35}, {"id": 3, "name": "Herman", "age": 26}]")
+													- (And add a "key=" attribute to the Create_Person function definition)
+														- (i.e.	"function Create_Person(person) {  )
+																(	return <Person key={person.id} name={person.name} age={person.age} />;  )
+														(		}"
+							- Call the .map function on the [Array of Javascript Objects] wherever you want the instances of the [Initial Function] to appear
+								- Pass the [Second, Mapping Function] as the argument to the .map function
+									- i.e. 	"{people.map(Create_Person)};"
+								- Will create one instance of the [Initial Function], (i.e. "<Person ...") for each object in the [Array of Javascript Objects], (i.e. "people").
+								- Could also do as a single statement with Arrow Notation
+									- i.e. 	"{people.map(person => (
+												<Person
+													key={person.name}
+													name={person.name}
+													age={person.age}
+												/>
+											))};"
+				- Conditional Rendering / Ternary Operators
+					- Way of re-writing an if/then/else expression, (which you can't use in React) into a functionally-identical statement, (which you can)
+					- "[Logical Condition - i.e. If Portion] ? [Then Portion] : [Else Portion]"
+						- Example if/then/else:
+							- 	"if (is_logged_in === true) {
+									return <h1>Hello</h1>;
+								} else {
+									return <h1>Login</h1>;
+								}"
+						- Converted to a ternary operator:
+							- 	"is_logged_in === true ? <h1>Hello</h1> : <h1>Login</h1>"
+								- (Note: Neither the [Then Portion] or [Else Portion] should include the return keyword or the ending ";")
+								- (Technically, since a boolean equality can be tested by just calling the variable name, without needing the "=== true")
+									- (You could also do the example version as "if (is_logged_in) { ..." and the ternary version as "is_logged_in ? <h1>Hello</h1> : <h1>Login</h1>")
+						- If you wish to do nothing for either [Then Portion] or [Else Portion], simply set that portion of the ternary operator to "null"
+							- i.e. "is_logged_in === true ? <h1>Hello</h1> : null"
+								- (or "is_logged_in ? <h1>Hello</h1> : null")
+									- Can actually be simplified even further due to the way Javascript evaluates [Compound Logical Conditions - i.e. If Portion with more than one test]
+										- If [Logical Condition - i.e. If Portion] includes a "&&" // an "and"
+											- i.e. (is_logged_in && name="Herman") 
+											- Since both terms have to be true for the [Compound Logical Conditions - i.e. If Portion with more than one test] to be true
+												- Javascript will stop evaluation if the first test - i.e. the one before the "&&" evaluates to false
+													- This can be used to modify the [Compound Logical Conditions - i.e. If Portion with more than one test] into becoming the entire ternary operator
+														- (Knowing that the right side of the "&&" operator in the [Compound Logical Conditions - i.e. If Portion with more than one test] will only be accessed at all if the left side is true)
+														- "[Logical Condition - i.e. If Portion] && [Then Portion]"
+															- i.e. "is_logged_in && <h1>Hello</h1>"
+																- (Note: In React, if trying to pass boolean values via props)
+																	- (i.e. "{props.is_logged_in && <h1>Hello</h1>}" inside "function Greeter(props) { ...")
+																		- (You have to enclose the boolean value you're trying to pass in curly braces)
+																			- (i.e. "<Greeter is_logged_in={true} />")
+				- Hooks
+					- Way of forcing React to re-render components
+						- By changing an object's State
+							- (e.g. All elements of status for a given item at a given time)
+						- (Note: cannot be used in index.js)
+					- React.useState([Array, where Array[0] is a value, and Array[1] is a function])
+						- i.e.	"let [count, set_count] = React.useState(0);"  // Note: uses Destructuring to concurrently assign "count = Array[0]", (which we then assign = 0, by passing as an argument), and "set_count = Array[1]", (which is just a wrapper function that does nothing on its own, but will perform whatever function is passed to it as an argument
+
+								"function increase() {
+									return set_count(count + 1);  // Note: do not use "count++" instead of "count + 1", as the button will then require two presses each time to increment, (count++) vs the one press intended, (count + 1)
+								}"
+
+								"return (
+									<div className="container">
+									<h1>{count}</h1>
+									<button onClick={increase}>+</button>
+									</div>
+								);"
