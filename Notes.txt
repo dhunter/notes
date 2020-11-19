@@ -1463,11 +1463,11 @@
 						- Since the components will include React bits
 							- "import React from 'react';" OR "const React = require('react');"  // The first way is the newer ES6+ way, but both ways work.
 						- Add any function definitions you want, tagging any functions you want to be externally-accessible with the "export" keyword
-							- i.e.	"export function Heading() { ..."  // "export" keyword included, so Externally-accessible
+							- i.e.	"export function Heading() { ...  // "export" keyword included, so Externally-accessible
 
-									"export function List() { ..."  // "export" keyword included, so Externally-accessible
+									export function List() { ...  // "export" keyword included, so Externally-accessible
 
-									"function List_Helper() { ..."  // "export" keyword not included, so Not Externally-accessible
+									function List_Helper() { ..."  // "export" keyword not included, so Not Externally-accessible
 						- Define the default function, even if there is only one function in the file
 							- i.e. "export default Heading;"
 					- In [package.json "main" js file]
@@ -1497,17 +1497,17 @@
 				- Props, (/Properties)
 					- Used to make React functions, (/ components) modular
 						- Can have one "Person" function, (/ component) with the info for multiple people
-							- i.e.	"<Person name="Ed" age=12 />"
-									"<Person name="Julia" age=35 />"
-									"<Person name="Herman" age=26 />
+							- i.e.	"<Person name="Ed" age=12 />
+									<Person name="Julia" age=35 />
+									<Person name="Herman" age=26 />"
 								- Can also externalize values into an array of javascript objects
 									- i.e. people = [{"name": "Ed", age: 12}, {"name": "Julia", "age": 35}, {"name": "Herman", "age": 26}]
 										- (Can also then move this array into an external file, if you want)
 											- (And then re-access by "import"ing the array from the external file)
 									- And access as:
-										"<Person name={people[0].name} age={people[0].age} />"
-										"<Person name={people[1].name} age={people[1].age} />"
-										"<Person name={people[2].name} age={people[2].age} />"
+										"<Person name={people[0].name} age={people[0].age} />
+										<Person name={people[1].name} age={people[1].age} />
+										<Person name={people[2].name} age={people[2].age} />"
 						- Can use in the function definition by specifying the name for a javascript object taken as an argument
 							- Traditionally, the name used is "props", (as in "properties")
 							- i.e. function Person(props) { ...
@@ -1621,20 +1621,65 @@
 																		- (You have to enclose the boolean value you're trying to pass in curly braces)
 																			- (i.e. "<Greeter is_logged_in={true} />")
 				- Hooks
-					- Way of forcing React to re-render components
-						- By changing an object's State
-							- (e.g. All elements of status for a given item at a given time)
-						- (Note: cannot be used in index.js)
+					- Way of using state in React components
+						- (e.g. All elements of status for a given item at a given time)
+					- (Note: cannot be used in index.js)
 					- React.useState([Array, where Array[0] is a value, and Array[1] is a function])
-						- i.e.	"let [count, set_count] = React.useState(0);"  // Note: uses Destructuring to concurrently assign "count = Array[0]", (which we then assign = 0, by passing as an argument), and "set_count = Array[1]", (which is just a wrapper function that does nothing on its own, but will perform whatever function is passed to it as an argument
+						- (Note: has to be inside another function, i.e. App() )
+						- i.e.	"function App() {	
+									let [count, set_count] = React.useState(0);  // Note: uses Destructuring to concurrently assign "count = Array[0]", (which we then assign = 0, by passing as an argument), and "set_count = Array[1]", (which is just a wrapper function that does nothing on its own, but will perform whatever function is passed to it as an argument
 
-								"function increase() {
-									return set_count(count + 1);  // Note: do not use "count++" instead of "count + 1", as the button will then require two presses each time to increment, (count++) vs the one press intended, (count + 1)
+									function increase() {
+										return set_count(count + 1);  // Note: do not use "count++" instead of "count + 1", as the button will then require two presses each time to increment, (count++) vs the one press intended, (count + 1)
+									}
+
+									return (
+										<div className="container">
+										<h1>{count}</h1>
+										<button onClick={increase}>+</button>
+										</div>
+									);
 								}"
+					- (Replaces older class-based method of using state in React)
+						- (i.e. "class App extends React.Component { render() { return ...")
+							- (with lots of "this.[Whatever]"s)
+				- Forms
+					- Use React state, (vs standard HTML form element state) and events
+						- i.e.	"function App() {
+									const [name, set_name] = React.useState("");
+									const [is_clicked, set_is_clicked] = React.useState(false);
 
-								"return (
-									<div className="container">
-									<h1>{count}</h1>
-									<button onClick={increase}>+</button>
-									</div>
-								);"
+									function handle_change(event) {
+										set_name(event.target.value);  // or event.target.placeholder or event.target.type, etc.
+									}
+
+									function handle_click() {
+    									set_is_clicked(true);
+  									}
+
+									return {
+										<div className="container">
+											<h1>Hello {is_clicked ? name : null}</h1>  // Note: do not use curly braces around a React variable inside a React statement, as this passes an object vs a value
+											<input
+												onChange={handle_change}
+												type="text"
+												placeholder="What's your name?"
+												value={name}  // Converts this HTML form element into a "Controlled Component" - i.e. forces the HTML form element, (i.e. <input>, <textarea>, <select>, etc) to use React state vs their own internal state, which could be different.
+											/>
+											<button onClick={handle_click}>Submit</button>
+										</div>
+									}
+								}"
+						- (Note: The above doesn't use the standard HTML <form> tag)
+							- (Since the default behavior of an HTML <form> is to refresh the page on submit)
+								- (Which will reset React back to its initial state, which often is not what you want)
+							- (If you want to use the <form> tag)
+								- (In the function that handles the submit, have to explicitly tell the form not to refresh the page)
+									- (i.e.	"function handle_click(event) {  // have to add "event" argument to the function definition
+												set_is_clicked(true);
+												event.preventDefault();  // Stops page refresh
+											}"  )
+								- (Move handle_click from the button's onClick event to the form's onSubmit one)
+									- (i.e. "<form onSubmit={handle_click} ...")
+								- (Add "type='submit'" flag to the submit button)
+									- (i.e. "<button type="submit"> ...")
