@@ -373,7 +373,28 @@
 						- i.e. 	"const animal_two = {"name": "cat", "sound": "meow", "feedingRequirements": {"food": 2, "water": 3}};  // [Given Object #2]
 								"const { name, sound, feedingRequirements: { food, water }} = animal_two;"  // name = "cat", sound = "meow", food = 2, water = 3
 								- (Can also ignore nested objects, and assignment still works for the non-nested key values)
-									(i.e. 	"const { name, sound } = animal_two;  //  name = cat, sound = meow;  Note "= animal_two", it's using [Given Object #2], the one with the nested object "feedingRequirements", rather than [Given Object #1], the one with no nested object, and it still works	
+									(i.e. 	"const { name, sound } = animal_two;  //  name = cat, sound = meow;  Note "= animal_two", it's using [Given Object #2], the one with the nested object "feedingRequirements", rather than [Given Object #1], the one with no nested object, and it still works
+		- Spread Operator, (ES6 / "...")
+			- Method of adding the elements of one array into another array, or one object into another object without nesting
+				- i.e.	"const citrus = ["Lime", "Lemon", "Orange"];
+						const fruits = ["Apple", "Banana", "Grapefruit", ...citrus]"
+							- Yields fruits = ["Apple", "Banana", "Grapefruit", "Lime", "Lemon", "Orange"] // fruits[3] = "Lime"
+								- (NOT fruits = ["Apple", "Banana", "Grapefruit", ["Lime", "Lemon", "Orange"]] // fruits[3] = ["Lime", "Lemon", "Orange"])
+				- i.e.	"const full_name = {
+							"first_name": "Edgar",
+							"last_name": "Bergen"
+						}
+						const user = {
+							...full_name,
+							id: 1,
+							username: "ebergen"
+						}
+							- Yields user = {"first_name": "Edgar", "last_name": "Bergen", "id": 1, "username": "ebergen"}  // user.first_name = "Edgar"
+								- (NOT user = {"full_name": {"first_name": "Edgar", "last_name": "Bergen"}, "id": 1, "username": "ebergen"}  // user.first_name does not exist; user.full_name.first_name = "Edgar")
+			- Can be placed at any location inside another array, (/ object, but objects don't use indices, so more for style than usefulness)
+				- i.e.	"const fruits = ["Apple", ...citrus, "Banana", "Grapefruit"]"
+							- Yields fruits = ["Apple", "Lime", "Lemon", "Orange", "Banana", "Grapefruit"]
+
 		- Javascript Quirks
 			- Scope
 				- Javascript has 3 concepts of scope for 3 types of assignments:
@@ -1622,12 +1643,16 @@
 																			- (i.e. "<Greeter is_logged_in={true} />")
 				- Hooks
 					- Way of using state in React components
-						- (e.g. All elements of status for a given item at a given time)
+						- (state = all attributes of a given item at a given time)
+						- (Replaces older class-based method of using state in React)
+							- (i.e. "class App extends React.Component { render() { return ...")
+								- (with lots of "this.[Whatever]"s)
 					- (Note: cannot be used in index.js)
 					- React.useState([Array, where Array[0] is a value, and Array[1] is a function])
+						- (Note: there are other React hooks beyond just "useState", but that is the one most commonly used)
 						- (Note: has to be inside another function, i.e. App() )
 						- i.e.	"function App() {	
-									let [count, set_count] = React.useState(0);  // Note: uses Destructuring to concurrently assign "count = Array[0]", (which we then assign = 0, by passing as an argument), and "set_count = Array[1]", (which is just a wrapper function that does nothing on its own, but will perform whatever function is passed to it as an argument
+									let [count, set_count] = React.useState(0);  // Note: uses Destructuring to concurrently assign "count = Array[0]", (which we then assign = 0, by passing as an argument), and "set_count = Array[1]", (which is just a setter function used to change the value of the named variable mapped to the value in Array[0], in this case "count")
 
 									function increase() {
 										return set_count(count + 1);  // Note: do not use "count++" instead of "count + 1", as the button will then require two presses each time to increment, (count++) vs the one press intended, (count + 1)
@@ -1640,14 +1665,66 @@
 										</div>
 									);
 								}"
-					- (Replaces older class-based method of using state in React)
-						- (i.e. "class App extends React.Component { render() { return ...")
-							- (with lots of "this.[Whatever]"s)
+						- Can use more complex state definitions by passing an object to React.useState
+							- i.e. 	"let [full_name, set_full_name] = React.useState({
+										"first_name": "John",
+										"middle_name": "Hamish",
+										"last_name": "Watson"
+									});"
+							- However, when attempting to update individual keys, React will null out the value of any non-specified keys
+								- So, instead of being able to do a simple "set_full_name({"first_name": "Ed"});" // which will yield {"first_name": "Ed", "middle_name": "", "last_name": ""}, rather than the intended {"first_name": "Ed", "middle_name": "Hamish", "last_name": "Watson"}
+									- You need to explicitly define the update function to update all keys that you didn't actually want to update with their prior values, in addition to the updating the keys that you actually really wanted to update with their new values.
+										- This is much less onerous than it could be if you use the Spread Operator, ("...", see above)
+										- i.e.	"function handle_change(event) {
+													event.persist(); // Only required for React < v.17, or React Mobile, (< v.17, React events would null out after the first time they were triggered, so if you tried to, say, type a word into an input string, all event values would be populated properly when the first letter was entered, but then all values for the event would be nulled out as soon as you typed the second letter, unless you explicitly added "event.persist()".  This behavior was done away with on the Web in React v.17, and events now retain their values as expected, so "event.persist()" is no longer required if you are using React 17+.  If you want to know more, see https://reactjs.org/docs/legacy-event-pooling.html).
+
+													if (event.target.name === "fName") {  // <input name="fName" ...
+														set_full_name((previous_value) => {      
+															return {
+																...previous_value,  // Adds a copy of all the keys of previous_value
+																"first_name": event.target.value,  // Overwrites the copied values of the previous_value keys you actually wanted to update.
+															}
+														}); // {"first_name": [Whatever's typed in the "fName" <input> tag], "middle_name": "Hamish", "last_name": "Watson"}
+													} else if (event.target.name === "mName") {  // <input name="mName" ...
+														set_full_name((previous_value) => {      
+															return {
+																...previous_value,
+																"middle_name": event.target.value
+															}
+														}); // {"first_name": "John", "middle_name": [Whatever's typed in the "mName" <input> tag], "last_name": "Watson"}
+													} else {  // presuming only three <input> tags exist  // <input name=[Whatever other than "fName" or "mName", but logically, would be "lName"]
+														set_full_name((previous_value) => {      
+															return {
+																...previous_value,
+																"last_name": event.target.value  // Wanted to update
+															}
+														});  // {"first_name": "John", "middle_name": "Hamish", "last_name": [Whatever's typed in the third <input> tag]}
+													}
+												}"
+										- OR
+											- If you set the key names = the names used in the <input> tags
+												- i.e. 	"let [full_name, set_full_name] = React.useState({
+													"fName": "John",
+													"mName": "Hamish",
+													"lName": "Watson"
+												});"
+											- Can get rid of the if statements, and simply sub in the input name variables 
+												- i.e.	"function handle_change(event) {
+													   		event.persist();
+
+													   		set_full_name((previous_value) => {
+												     			return {
+												       				...previous_value,
+												       				[event.target.name]: event.target.value  // Note [] around the variable name.  If the key names used in this statement are anything other than the variable names defined in the React hook itself, React will not interpret the name used as a variable, but just as a random string UNLESS the name is encased inside "[]", (not "{}" as in most javascript items, but "[]")
+												     			};
+												   			});
+												 		}"
+
 				- Forms
 					- Use React state, (vs standard HTML form element state) and events
 						- i.e.	"function App() {
-									const [name, set_name] = React.useState("");
-									const [is_clicked, set_is_clicked] = React.useState(false);
+									let [name, set_name] = React.useState("");  // Will often see as "const [name, set_name] ..." but since this is expressly being used to define mutable variables, definitely should not be declared as a const
+									let [is_clicked, set_is_clicked] = React.useState(false);
 
 									function handle_change(event) {
 										set_name(event.target.value);  // or event.target.placeholder or event.target.type, etc.
