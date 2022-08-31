@@ -1,8 +1,483 @@
+- Data Science
+	- Resources
+		- BeautifulSoup, (web scraping) Video - https://www.youtube.com/watch?v=ng2o98k983k
+		- IBM Data Science Professional Certificate - https://www.coursera.org/professional-certificates/ibm-data-science#courses
+		- labs.cognitiveclass.ai
+		- Seaborn - Python visualization library
+	- Data Science Methodology
+		- Business Understanding, (↓)
+			- Form a concrete business or research problem
+				- Questions / concerns are best addressed during this stage
+		- Analytic Approach, (↓)
+			- Which approach(es) will be most effective to answer the question(s) in the Business Understanding stage?
+		- Data Requirements, (↑↓)
+			- What data do you need to answer the question(s)?
+		- Data Collection, (↑↓)
+			- Where is data coming from, (identify all sources)
+			- How will you get it?
+		- Data Understanding, (↓)
+			- Checking overall data quality
+			- Descriptive Statistics
+			- Univariate Modeling
+			- Pairwise Correlation
+				- Correlating pairs of variables to look for ones that are highly correlated and thus redundant / skewing
+			- Histogram Generation
+		- Data Preparation, (↑↓,→ to Data Collection)
+			- 70-90% of total project time
+				- Automation of data conversion highly valuable.
+			- Consideration of what to do with missing / invalid data
+			- Feature Engineering
+				- Using domain knowledge, etc to create features from variables
+		- Modeling, (↑↓)
+			- Descriptive vs Predictive
+			- For Predictive only, use Training and Test sets, (commonly 70% / 30% of available data, respectively)
+		- Evaluation, (↓)
+			- Did the model answer the question answered?
+			- Prescriptive - Use Decision Tree to validate
+			- Descriptive - Test model output vs another dataset where outcome is known.
+			- Statistical Significance
+			- ROC Curve
+				- Diagnostic tool for classification model evaluation
+				- True-Positive Rate vs False-Positive Rate
+					- Optimal model at maximum separation between two curves.
+		- Deployment, (↓)
+		- Feedback, (↓, → to Modeling)
+			- Define review process
+				- Period of time for initial review
+				- Measure results of applying model
+					- Test vs Control groups, (if ethical)
+					- Before vs After implementation, (if using Control group unethical)
+			- Determine potential model refinements
+				- If cost-effective, backtest impact of refinements vs. data from review process
+					- To determine potential impact
+				- Implement, if desired.
+	- Databases and SQL for Data Science
+		- In Jupyter notebooks
+			- "%sql" says the rest of the statement is sql
+			- "%%sql" says the rest of the block is sql
+		- In Python
+			- To avoid EOL errors in strings, make sure to use triple quotes, (including all sql statements)
+	- Data Analysis with Python, (with pandas, numpy, etc)
+		- Data Preprocessing
+			- Finding missing values
+				- <code_block>
+					missing_data = dataframe.isnull()
+					for column_name in missing_data.columns.values.tolist()
+						print(column_name)
+						print(missing_data[column_name].value_counts())
+						print("")
+				- </code_block>
+			- Replacing missing values
+				- dataframe.fillna(value_you_want_to_fill_with)
+				- Categorical features
+					- Can replace by mode of column / feature
+						- Effectively the non-numeric version of averaging the column, with all the plusses and minuses thereof
+						- <code_block>
+							feature_mode = dataframe[column_name].value_counts().idxmax()
+							dataframe[column_name].replace(numpy.nan, feature_mode, inplace = True)					
+						- </code_block>
+			- Dropping values
+				- dataframe.dropna(axis, inplace)
+					- axis = 0 drops the row, = 1 drops the column
+					- inplace = True modifies the dataframe itself, = False does not.
+			- Data Formatting
+				- Converting mpg to metric equivalent, (L/100km)
+					- dataframe['mpg'] = 235/dataframe['mpg']
+				- Converting erroneous column data type
+					- (i.e. changing column from an object to an int/float)
+					- dataframe[column_name] = dataframe[column_name].astype(type)
+			- Data Normalization
+				- To ensure variables with larger scales won't have a larger impact than ones with smaller scales during regression
+				- Simple Feature Scaling - current / max - 0-1 scale
+				- Max-min - (current-min)/(max-min) - 0-1 scale
+				- Z-score - (current-mean)/std dev - ~-3-3 scale
+			- Binning
+				- Converting numeric feature into new categorical feature
+					- <code_block>
+						bins = numpy.linspace(min(dataframe[column_name]),max(dataframe[column_name]),number_of_bins)
+						bin_names = [list_of_bin_names]
+						dataframe[new_binned_column_name] = pandas.cut(dataframe[column_name],bins,labels=bin_names,include_lowest = True)
+					- </code_block>
+			- One-hot encoding, (i.e. creating dummy variables)
+				- Converting a single categorical feature into multiple 0/1 numeric features
+					- pandas.get_dummies(dataframe[column_name])
+		- Exploratory Data Analysis
+			- Descriptive Statistics
+				- dataframe.describe()
+					- Warning - All NaN values will be excluded
+						- So will not serve as a double-check that you've completed pre-processing properly
+							- On the upside, also means that pre-processing isn't required to use.
+			- Categorical summarization
+				- <code_block>
+					# Entire dataframe - number of unique category values, top category value, frequency of top category value
+					dataframe.describe(include=['object'])
+
+					# Counts of all category values within a categorical variable
+					dataframe[column_name].value_counts()
+				- </code_block>
+			- Grouping into subcategories, (example uses mean - could be any stat)
+				- <code_block>
+					dataframe_temp = dataframe[[independent_column_1,independent_column_2,dependent_column]]
+
+					# Provides mean of dependent_column for each independent_column_2 within each independent_column_1
+					dataframe_grouped = dataframe_temp.groupby([independent_column_1,independent_column_2], as_index = False).mean()
+
+					# (Optional) - Convert to pivot table
+					dataframe_pivot = dataframe_grouped.pivot(index = independent_column_1, columns = independent_column_2)
+
+					# (Optional after pivot) - Convert to Heatmap
+					matplotlib.pyplot.pcolor(dataframe_pivot, cmap = desired_color_scheme)
+					matplotlib.pyplot.colorbar()
+					matplotlib.pyplot.show()
+				- </code_block>
+			- Correlation
+				- Visualizations
+					- Steep slopes, negative or positive, indicate strong correlation
+					- Flat slopes indicate weak correlation
+					- <code_block>
+						# Scatterplot with linear regression line
+						seaborn.regplot(x = independent_column, y = dependent_column, data = dataframe)
+
+						# Force y to start at 0
+						matplotlib.pyplot.ylim(0,		
+					- </code_block>
+				- Pearson Correlation
+					- Measures strength of correlation
+					- Correlation Coefficient
+						- How strong is the actual correlation?
+						- Close to +1 - Large positive correlation
+						- Close to -1 - Large negative correlation
+						- Close to 0 - No relationship
+					- P-value
+						- How confident are we that that correlation exists?
+						- P < 0.001 - Strong certainty of the correlation
+						- P < 0.05 - Moderate certainty
+						- P < 0.1 - Weak certainty
+						- P > 0.1 - No certainty
+					- <code_block>
+						# For just the coefficient and p-value between two variables
+						pearson_coefficient, p_value = scipy.stats.pearsonr(dataframe[column_1], dataframe[column_2])
+		
+						# For correlation table of just coefficients, (i.e. no p-values)
+						dataframe.corr()  # For the entire dataframe
+						dataframe[[column_1,column_2,...,column_n]].corr() # For only examining correlations for specific variables.
+					- </code_block>
+				- Analysis of Variance, (ANOVA)
+					- Used to find variation between individual categories for categorical variables
+						- i.e. average price of a car by make, (i.e. Toyota, Saab, etc)
+					- F-test score
+						- Variation between each (categorical group mean / intra-category variation)
+							- i.e. (Subaru ave price / difference in Subaru prices per observation) vs (Honda ave price / difference in Honda prices per observation)
+						- Will be higher the higher variation exists.
+							- i.e. will be small for Subaru vs Honda / Toyota
+								- Will be large for Subaru vs Jaguar / Mercedes / Porsche
+					- P-value
+						- (as in Pearson Correlation)
+					- <code_block>
+						dataframe_anova = dataframe[[independent_categorical_column, dependent_column]]  # dataframe[['make', 'price']]
+						grouped_anova = dataframe_anova.groupby([independent_categorical_column])  # .groupy(['make'])
+						anova_results_1 = scipy.stats.f_oneway(grouped_anova.get_group(category_value_1)[dependent_column], grouped_anova.get_group(category_value_2)[dependent_column])  # .get_group('honda')['price']   .get_group('subaru')['price']
+					- </code_block>
+		- Model Development
+			- Regression
+				- Linear
+					- <code_block>
+						linear_regression_model = sklearn.linear_model.LinearRegression()
+						x = dataframe[[independent_variable(s)]]
+						y = dataframe[dependent_variable]
+						linear_regression_model.fit(x, y)
+
+						# Obtain predictions
+						y_hat = linear_regression_model.predict(x)  # Using stats convention of a carat or "hat" over a letter to indicate that that value is a prediction, not an actual value.
+
+						# Obtain y-intercept & slope
+						linear_regression_model.intercept_
+						linear_regression_model.coef_ # Returns an array, even if only one independent variable is used.
+					- </code_block>
+					- Visualizations
+						- Regression Plot
+							- (as in the Correlation section - "Scatterplot with linear regression line")
+						- Residual Plot
+							- If linear regression proper as a model type for the given independent_variable, expect residuals to:
+								- Have a mean = 0
+								- Be randomly spread out above and below the mean, regardless of independent_variable value
+									- i.e. The spread should look the same at x = 0 and x = (infinity)
+								- Have no curvature
+							- seaborn.residplot(dataframe[independent_variable],[dependent_variable])
+						- Distribution Plot
+							- y, (actual) vs y_hat, (predicted)
+								- Helps to show regions of independent_variable where the model may not be a good predictor						- <code_block>
+							- <code_block>
+								ax1 = seaborn.distplot(dataframe[dependent_variable], hist = False, color = desired_color, label = "Actual Value")
+								seaborn.displot(y_hat, hist = False, color = another_desired_color, label = "Fitted Values", ax = ax1)
+							- </code_block>
+				- Polynomial
+					- For independent variables where the presumption that the relationship between that independent_variable and dependent_variable is linear is false
+						- (i.e. where the Residual Plot, above, doesn't conform to the 3 expectations)
+					- Can be either one-dimensional
+						- Will only have a single independent_variable squared, cubed, etc
+							- i.e. y_hat = Intercept + A(x1) + B(x1)^2 + C(x1)^3 + ...
+						- <code_block>
+							one_dimensional_whatever_order = numpy.polyfit(x, y, whatever_order_youre_trying_to_test) # i.e. squared, cubed, ^4, etc
+							whatever_order_polynomial = numpy.poly1d(one_dimensional_whatever_order)
+							print(whatever_order_polynomial)
+						- </code_block>
+					- Or multi-dimensional
+						- Where multiple independent variables will be varied concurrently
+							- i.e. y_hat = Intercept + A(x1) + B(x2) + C(x1)(x2) + D(x1)^2 + E(x2)^2 + ...
+						- <code_block>
+							# Scikit-learn can't do multi-dimensional directly, so have to do some preprocessing first
+
+							# If not using pre-scaled variables, scale each independent variable before combining
+							# scaled_variables = sklearn.preprocessing.StandardScaler
+							# scaled_variables.fit(dataframe[[independent_variable_1,independent_variable2]])  # ,...
+							# multiple_independent_variables = scaled_variables.transform(dataframe[[independent_variable_1,independent_variable2]])  #,...
+
+							# If using pre-scaled variables
+							multiple_independent_variables = dataframe[[independent_variable_1, independent_variable_2]]
+
+							multi_dimensional_whatever_order = sklearn.preprocessing.PolynomialFeatures(degree = whatever_order_youre_trying_to_test, include_bias = False)
+							combined_multiple_independent_variables = sklearn.preprocessing.PolynomialFeatures.fit_transform(multiple_independent_variables)  # TODO: at 2019-03-28, not entirely positive that this use of fit_transform fits quite right after the scaling section, so should test and modify, as appropriate.
+						- </code_block>
+					- <code_block>
+						# Alternative Method, Using Pipelines
+						## Performing the entire scaling -> polynomial transformation -> regression at once
+						input = [('scale',sklearn.preprocessing.StandardScaler()),
+							('polynomial',sklearn.preprocessing.PolynomialFeatures(degree=whatever_order_youre_trying_to_test),
+							('model',sklearn.linear_model.LinearRegression())]
+						pipe = sklearn.pipeline.Pipeline(input)
+						pipe.train(dataframe[[independent_variable_1,independent_variable_2]], dependent_variable)   # ,... for more independent variables.
+						y_hat = pipe.predict(dataframe[[independent_variable_1,independent_variable_2]])
+					- </code_block>
+				- Evaluating Accuracy
+					- Mean Squared Error, (MSE)
+						- Sum of Squared Errors, (SSE) / # of samples
+						- sklearn.metrics.mean_squared_error(dataframe[dependent_variable], y_hat)
+					- R^2, (Coefficient of Determination)
+						- How close the data is fitted to the regression line
+							- i.e. % of variation in dependent_variable explained by the model
+						- 1 - (MSE of regression line) / (MSE of actual data)  
+
+						- sklearn.linear_model.LinearRegression.score(dataframe[independent_variable],dataframe[dependent_variable])
+					- Training, (in-sample) vs Testing, (out-of-sample) sets
+						- (often 70/30)
+						- x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split([independent_variables_1-n],[dependent_variable],test_size = decimal_of_percent_of_data_you_want_as_test_set_ie_0.3_for_a_70_30_split, random_state = 0)
+							- Can and should run multiple times to train and test the model on different groups of training and testing data
+						- Cross Validation
+							- Separate data into N groups, ("folds")
+							- Run training and testing using different groups for training and testing
+								- Until all groups have been used both to train and to test
+							- Use ave of out-of-sample error, (i.e. R^2) for all of these iterations as final out-of-sample error
+							- sklearn.model_selection.cross_val_score(initialized_object_for_type_of_model_used,[independent_variables_1-n],[dependent_variable],cv = number_of_folds_used)
+								- Returns an array of R^2 values for each fold iteration
+							- sklearn.model_selection.cross_val_predict(initialized_object_for_type_of_model_used,[independent_variables_1-n],[dependent_variable],cv = number_of_folds_used)
+								- Returns an array of predicted values for the test set of each fold iteration
+					- Underfitting vs Overfitting
+						- (for polynomial regression)
+						- Underfitting
+							- Model not complex enough, (i.e. doesn't use a high enough order function) to well describe the true model, (i.e. using a linear model to describe a parabolic true function)
+						- Overfitting
+							- Model so complex that it better tracks the training data than the actual true function
+								- Which is a problem since the training data combines elements of the true function / predictable variation, (which we want) and elements of noise / non-predictable variation, (which we don't)
+							- Example:
+								- Given - the model that's the closest estimator, (i.e. lowest MSE/R^2 of the test data) is an 8th order function
+								- A second model is run that's a 16th order function
+								- The 16th order function has a lower error vs the training points vs the 8th order function
+									- But now a higher error vs the true function, (/ test points).
+						- If you graph function order on x axis, MSE of test data on y axis
+							- Should select min(MSE) function order
+								- Any orders to the left of that are underfit
+								- Any orders to the right are overfit
+						- Can also look for max(R^2) vs function order for any given independent variable
+							- <code_block>
+								r_squared_test = []
+								order = [1,2,3,4]  # to whatever order max you'd like
+								
+								for n in order:
+									polynomial_regression = sklearn.preprocessing.PolynomialFeatures(degree = n)								
+									x_train_polynomial_regression = polynomial_regression.fit_transform(x_train[[independent_variable]])
+									x_test_polynomial_regression = polynomial_regression.fit_transform(x_test[[independent_variable]])
+
+									linear_regression = sklearn.linear_model.LinearRegression()
+									linear_regression.fit(x_train_polynomial_regression, y_train)
+
+									r_squared_test.append(linear_regression.score(x_test_polynomial_regression,y_test)
+							- </code_block> 
+						- Ridge Regression
+							- Tries to smooth / reduce effect of outliers on regression line
+								- i.e. forces the model to underfit to varying, selected, degrees
+									- By modifying model-derived coefficients by a selectable "hyperparameter," (i.e. not included in fitting or training processes) alpha
+										- Higher alpha goes, higher the underfitting
+											- Select alpha that maximizes R^2, minimizes MSE, etc)
+							- <code_block>
+								ridge_model = sklearn.linear_model.Ridge(alpha = whatever_value_you_want)
+								ridge_model.fit(x, y)
+								y_hat = ridge_model.predict(x)
+							- </code_block>
+							- Grid Search
+								- Automated process of picking best hyperparameters, (in this case, alpha)
+								- Breaks data into 3 sets
+									- Training, (regular usage)
+									- Validation, (to determine best values of hyperparameters to min MSE / max R^2)
+									- Test, (regular usage)
+								- <code_block>
+									hyperparameters = [{'alpha':[1, 10, 100, 1000], 'normalize':[True, False]}]   # For 'alpha' - or whatever other values of alpha you want to test.  'normalize' is whether the model will auto-normalize the independent variables before testing
+									ridge_regression = sklearn.linear_model.Ridge()
+
+									grid_search = sklearn.model_selection.GridSearchCV(ridge_regression, hyperparameters, cv = number_of_folds_you_want_to_use)
+
+									grid_search.fit(x_data[[independent_variables]],y_data)  # By default, uses R^2
+									grid_search.best_estimator_
+
+									scores = grid_search.cv_results_
+									scores['mean_test_score']  # Returns an array of the variant R^2's on test data
+
+									# (Optional) If you want to print out all of the permutations of hyperparameters with their scores
+									# for param, mean_train, mean_test inzip(scores['params'], scores['mean_train_score'], scores['mean_test_score']):
+									# 	print(param, "R^2 on test data:", mean_test, "R^2 on train data:", mean_train)
+								- </code_block>
+	- Data Visualization with Python
+		- Box Plots
+			- Max and Min do not include outliers
+				- In order to be considered an outlier, value must be < Q1 or > Q3 by at least 1.5 * the Interquartile Range, (IQR)
+					- IQR = Q3 - Q1
+	- Machine Learning with Python
+		- Accuracy
+			- Training
+				- Accuracy of predictions to the training set
+				- High levels can be a bad thing, as could show over-fitting
+					- If training is using the entire dataset
+						- (vs. train/test split)
+			- Out-of-sample
+				- Accuracy of predictions to data not in the training set
+				- This is what we're trying to optimize
+			- For classifier models, (i.e. labeled/non-continuous dependent variables)
+				- Jaccard Index, (best = 1.0)
+					- Intersection of predicted vs actual / Union of predicted vs actual
+				- F1 Score, (best = 1.0)
+					- Use Confusion Matrix, (y axis = true labels, x axis = predicted lables)
+						- Hones in on odds of:
+							- True Positive & Negative, (predicted = actual)
+							- False Positive & Negative, (predicted =/= actual)
+						- Calculate Precision & Recall for each class
+							- Precision = True Positive / (True Positive + False Positive)
+							- Recall = True Positive / (True Positive + False Negative)
+						- F1 Score(each class) = 2 * (Precision * Recall) / (Precision + Recall)
+						- F1 Score(classifier model) = Non-weighted average(F1 Score(each class) for all classes)
+				- Log Loss, (best = 0)
+					- Where the predicted output is a probability value between 0 and 1
+					- Calculates how far the prediction is from the actual
+						- So want to minimize this value
+					- Non-weighted average of (actual * log(predicted)) + ((1 - actual) * log(1 - predicted)) for each row
+		- Linear vs Non-Linear Relationships
+			- Alternative to scatter plots
+				- Run correlation matrix
+					- If correlation >= 0.7, relationship is linear
+		- K-Nearest Neighbors
+			- Selecting K
+				- Train/test split, train model with multiple K's, select K with highest accuracy
+			- If using for continuous dependent variables, (i.e. regression targets)
+				- Use median of K-nearest neighbors
+		- Decision Trees
+			- Select attribute order by which attribute does the best job of differentiation
+				- (Best differentiation = most "pure" = lowest "entropy" / homogeneity of split data)
+				- Best job = which attribute has the greatest "Information Gain"
+					- Information Gain = (Entropy before split) - (weighted Entropy after split)
+						- Entropy = - p(A) * log( p(A) ) - p(B) * log ( p(B) )
+							- Entropy = 0 if split data perfectly homogeneous, (i.e. 0 of type A, 8 of type B)
+							- Entropy = 1 if split data perfectly heterogeneous, (i.e. 4 of type A, 4 of type B)
+							- So always looking to minimize this value.
+		- Logistic Regression
+			- Regression for categorical dependent variables
+		- Support Vector Machine, (SVM)
+			- Supervised algorithm that classifies cases by finding separators for non-linearly-separable data
+				- Maps data to high-dimensional feature space
+					- By converting data until it -is- linearly separable, (kernelling)
+						- (i.e. x -> x^2, etc)
+				- Then estimates hyper-plane separator
+					- Best separator is the one with the largest "margin" possible
+						- (Margin = distance between the differentiated regions)
+						- (Data points closest to opposing group are called "support vectors," and are what are used to maximize margin)
+			- Good for:
+				- Image recognition
+				- Text category assignment
+				- Spam detection
+				- Sentiment analysis
+				- Gene expression classification
+			- Cons
+				- Prone to over-fitting
+				- Will not provide probabilities of a point existing in either group
+				- Too computationally expensive for large data sets
+					- (Becomes problematic over ~1000 rows) 
+		- Clustering
+			- K-Means
+				- Centroids (generally) initially chosen randomly
+					- (could also pick a random data points and assign as centroids)
+				- Assign each data point to centroid with minimum distance
+				- Move centroids to means of clusters and re-assign data points
+					- Continue until cluster movement below a threshold
+				- Note: Final results strongly dependent on initial centroids
+					- So need to run multiple times with different centroids each time
+				- Selecting k
+					- Run with multiple k's
+					- Compare each k to MSE of clusters
+					- Select k where reduction in MSE significantly reduces, (i.e. "elbow point")
+						- Since MSE will always reduce with an increase in k
+				- Pros
+					- Much more efficient for large datasets
+				- Cons
+					- Has no concept of outliers / all data points are assigned to a cluster
+						- So no way to determine anomalies
+			- Hierarchical Clustering
+				- Divisive, (top-down)
+					- Start with one cluster, then move into each cluster and cluster within.
+						- To whatever level desired
+				- Agglomerative, (bottom-up)
+					- More popular approach
+					- Each data point starts as its own cluster
+						- Clusters are merged by closest distance, reducing number of clusters
+						- Distances recomputed with single values for new merged clusters
+							- Options for values to use for merged clusters
+								- Single-Linkage Clustering
+									- Distance between nearest data points in each cluster
+								- Complete-Linkage Clustering
+									- Distance between farthest data points in each cluster
+								- Average Linkage Clustering
+									- Mean of distances of every point in one cluster to every point in another
+								- Centroid Linkage Clustering
+									- Using cluster centroid / mean
+						- Repeat until either:
+							- All clusters are merged
+							- Cluster similarity minimum is exceeded
+								- (i.e. you specifically decide that you will only merge clusters where the distance between them is below a selected value)
+				- Pros
+					- Does not require number of clusters to be specified
+					- Provides ability to drill-down from clusters to sub-clusters
+					- Always generates the same clusters
+			- Density-Based Clustering, (DBSCAN)
+				- (_D_ensity-_B_ased _S_patial _C_lustering of _A_pplications with _N_oise)
+				- For use with arbitrarily-shaped clusters or clusters inside other clusters
+					- (for the latter, think of Cluster A as being a donut, with Cluster B being inside the whole, where there is no hierarchical relationship between them)
+				- Locates regions of high density separated by regions of low density
+					- Using
+						- R, (radius of neighborhood)
+						- M, (min number of neighbors required to declare a cluster)
+					- Differentiates points into:
+						- Core
+							- Within radius R, there are a min of M points, (inclusive of given point)
+						- Border
+							- Within radius R of a core point, but with M < min within R of given point
+						- Outlier
+							- Neither a core nor border point
+								- i.e. not a core point, nor within radius R of a core point
+					- And then creates clusters of all core and associated border points where:
+						- A given core point is within radius R of another core point
+				- Pros
+					- Identifies outliers / does not assign every data point to a cluster
+					- Does not require number of clusters to be specified
 - Web Design
-	- Credits
-		- The Complete 2020 Web Development Bootcamp, (https://www.udemy.com/course/the-complete-web-development-bootcamp/)
-			- Course Resources List
-				- https://www.appbrewery.co/p/web-development-course-resources/
+	- Resources
+		- The Complete [current year] Web Development Bootcamp - https://www.udemy.com/course/the-complete-web-development-bootcamp/learn/lecture/17039626?start=0#content
 	- CSS elements with multiple measurements on one line
 		- The numbers start on the top and go clockwise around the item	
 		- {border: 0px 10px 20px 30px;} would have a:
@@ -394,7 +869,6 @@
 			- Can be placed at any location inside another array, (/ object, but objects don't use indices, so more for style than usefulness)
 				- i.e.	"const fruits = ["Apple", ...citrus, "Banana", "Grapefruit"]"
 							- Yields fruits = ["Apple", "Lime", "Lemon", "Orange", "Banana", "Grapefruit"]
-
 		- Javascript Quirks
 			- Scope
 				- Javascript has 3 concepts of scope for 3 types of assignments:
@@ -681,7 +1155,6 @@
 								  	    [whatever get_date actually does, including return statement]
 							  		};"
 							- Gives [package.json "main" js file] access to function(s) return(s)
-		
 			- (Github)
 				- Hiding API keys, (and other sensitive info)
 					- Add ".env" file to [project directory]
@@ -1541,13 +2014,72 @@
 																<p>Age: {props.age}</p>
 															</div>;
 												}"
+							- (Note: props are read-only)
+						- If passing information from a function in another file
+								- Need to pass using an object
+									- Can be used bi-directionally
+								- (i.e. from calling file/App.jsx to component file/ToDoItem.jsx - i.e. to pass the text for each item in an array)
+									- i.e.
+										- In App.jsx:
+											"import ToDoItem from "./ToDoItem";"
+
+											(...)
+
+											"{items.map((todoItem) => (
+												<ToDoItem text={todoItem} />
+											))}"
+										- In ToDoItem.jsx:
+											- 	"function ToDoItem(props) {
+													return <li>{props.text}</li>
+												}
+
+												export default ToDoItem;"
+								- (i.e. from component file/ToDoItem.jsx to calling file/App.jsx - i.e. to delete an item from that array)
+										- In App.jsx:
+											"import ToDoItem from "./ToDoItem";
+											let [items, setItems] = React.useState([]);"
+
+											(...)
+
+											"function delete_item(id) {
+    											setItems((prevItems) => {
+      												return prevItems.filter((items, index) => {  // Create a new, filtered array with everything from the prior array except for the item we want to delete, then save this array in place of the prior one.
+        												return index !== id; 
+      												});
+    											});
+  											}"
+
+											(...)
+
+											"{items.map((todoItem, index) => (
+												<ToDoItem
+													key={index}
+													id={index}
+													text={todoItem}
+													on_checked={delete_item}
+												/>  // Technically, apparently React doesn't like the idea of using an index as a key, since the item being referred to at a given index can be changed, so React prefers you to generate a UUID for each item.  Will leave that up to you to do or not.  Not doing here.
+											))}"  // Have to pass all necessary values and function names from the calling file to component file as props
+										- In ToDoItem.jsx:
+											- 	"function ToDoItem(props) {
+													return (
+													 	<li
+														 	onClick={() => {  // Need to pass as an anonymous function, (vs a standard onClick={props.on_checked}) so that you can pass the value in props.id to the function props.on_checked.  Yes, this is another incidence of what should be entirely unnecessary complexity.
+																props.on_checked(props.id); 
+															}}
+														>
+															{props.text}
+														</li>
+													);
+												}
+
+												export default ToDoItem;"
 				- .map in React
 					- Can be used to create multiple React components from an array of javascript objects with a single command
 						- Instead of having to manually create <Person name={people[X].name} age={people[X].age} for all objects in the people array
 							- Initial Setup, (/Confirmation)
 								- Create (/Confirm that you have) the [Initial Function] to be used, with props
 									- i.e.	"function Person(props) {
-												return 	<div>
+										JavaScript		return 	<div>
 															<h2>{props.name</h2>
 															<p>Age: {props.age}</p>
 														</div>;
@@ -1615,7 +2147,7 @@
 					- Way of re-writing an if/then/else expression, (which you can't use in React) into a functionally-identical statement, (which you can)
 					- "[Logical Condition - i.e. If Portion] ? [Then Portion] : [Else Portion]"
 						- Example if/then/else:
-							- 	"if (is_logged_in === true) {
+							- 	"if (is_logged_in === true) {  // for boolean variables, simply specifying the variable name itself, ( "(is_logged_in)" ) is functionally equivalent to "(is_logged_in === true)"
 									return <h1>Hello</h1>;
 								} else {
 									return <h1>Login</h1>;
@@ -1702,7 +2234,7 @@
 													}
 												}"
 										- OR
-											- If you set the key names = the names used in the <input> tags
+											- If you make the key names the same as the names used in the <input> tags
 												- i.e. 	"let [full_name, set_full_name] = React.useState({
 													"fName": "John",
 													"mName": "Hamish",
@@ -1719,7 +2251,28 @@
 												     			};
 												   			});
 												 		}"
+				- Common combination of hooks & ternary operators is to emulate responsiveness by adjusting styling when an action occurs, (i.e. onClick)
+					- i.e.
+						"function ToDoItem(props) {
+  							let [is_done, set_is_done] = React.useState(false);
 
+  							function handle_click() {
+    							set_is_done((prevValue) => {
+      								return !prevValue;
+    							});
+  							}
+
+  							return (
+    							<li
+      								onClick={handle_click}
+      								style={{ textDecoration: is_done ? "line-through" : "none" }}
+    							>
+      								{props.text}
+    							</li>
+  							);
+						}"
+					- (Note: the use of the JavaScript "prevValue" event property and "!prevValue", (i.e. "not/opposite of prevValue") is an easy way to specify an item that, for example, can be clicked and unclicked as often as desired)
+						- (There's also a prevItems for arrays, and probably other prev[whatevers])
 				- Forms
 					- Use React state, (vs standard HTML form element state) and events
 						- i.e.	"function App() {
@@ -1760,3 +2313,13 @@
 									- (i.e. "<form onSubmit={handle_click} ...")
 								- (Add "type='submit'" flag to the submit button)
 									- (i.e. "<button type="submit"> ...")
+- JavaScript, (cont'd from Web Development section)
+	- JavaScript: Understanding the Weird Parts - https://www.udemy.com/course/understand-javascript/learn/lecture/2237442?start=150#content
+		- Hoisting
+			- Can access functions and variable names, (though all variable values are set to undefined) earlier in the code than they are actually declared
+				- Would be an error in other programming languages
+					- (Note: trying to access variable names that are not at all in the file will still show as an error)
+			- Happens because the creation of the JavaScript Execution Context, (i.e. the area in the computer in which your code will be run) is actually created in two parts:
+				- Creation Phase
+					- Js syntax parser scans entire file and sets up memory space for all variables and functions listed in the file
+				- Execution Phase
