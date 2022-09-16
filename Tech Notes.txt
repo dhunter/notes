@@ -871,26 +871,28 @@
 							- Yields fruits = ["Apple", "Lime", "Lemon", "Orange", "Banana", "Grapefruit"]
 		- Javascript Quirks
 			- Scope
-				- Javascript has 3 concepts of scope for 3 types of assignments:
-					- Normal types
-						- Global Scope, (available everywhere)
-							- var x   -> global
-							- let x   -> global
-							- const x -> global
-						- Block-level Scope, (available only inside a function)
-							- NOTE: in Javascript, this is literally only inside a code block defined by the "function" keyword
-							- var x   -> local
-							- let x   -> local
-							- const x -> local
-					- Unusual type
+				- Javascript has 3 concepts of scope, instead of the more common 2:
+					- Global Scope, (available everywhere)
+						- var x   -> global
+						- let x   -> global
+						- const x -> global
+					- Block-level Scope - Function code blocks only
+						- NOTE: in Javascript, this version of scope is literally only inside a code block defined by the "function" keyword
+						- var x   -> local
+						- let x   -> local
+						- const x -> local
+					- Block-level Scope - Other-than-Function code blocks
 						- Inside any other code block not defined by the "function" keyword
 							- (i.e. if/else, for, do/while, etc)
-							- var x   -> global
-							- let x   -> local
-							- const x -> local
-				- For maximum similarity to other languages, always use "let" instead of "var"
-					- ("let" was specifically added to the language in ECMAScript 6 to address this issue)
-			- Constants that aren't real constants, (i.e. that aren't immutable)
+						- var x   -> global   // DING, DING, DING - who thought this was a good idea?  ;)
+						- let x   -> local
+						- const x -> local
+				- For maximum similarity to other programming languages
+					- Where there is no distinction between JS' two Block-level scopes
+						- (i.e. scopes for function, if/else, for, do/while, etc are all treated the same)
+						- Always use "let" instead of "var"
+							- ("let" was specifically added to the language in ECMAScript 6 to address this issue)
+			- Constants aren't real constants, (i.e. they aren't immutable)
 				- const [array name]
 					- You can't reassign [array name] entirely, (which is good)
 						- But you can still push items into it, (which is bad)
@@ -901,6 +903,7 @@
 					- You can actually make [object name] immutable after the const assignment
 						- By adding Object.freeze([object name])
 				- For maximum similarity to other languages, don't use "const" keyword if the array or object isn't really immutable
+					- I don't care what React generally uses - if a value isn't immutable, it's not a constant.  ;)
 			- Unenforced Elements 
 				- ";" usage at end-of-lines not enforced
 					- Can often either include an end-of-line semi-colon, or not, with no demonstrable effect on code function either way
@@ -2314,12 +2317,117 @@
 								- (Add "type='submit'" flag to the submit button)
 									- (i.e. "<button type="submit"> ...")
 - JavaScript, (cont'd from Web Development section)
-	- JavaScript: Understanding the Weird Parts - https://www.udemy.com/course/understand-javascript/learn/lecture/2237442?start=150#content
-		- Hoisting
-			- Can access functions and variable names, (though all variable values are set to undefined) earlier in the code than they are actually declared
-				- Would be an error in other programming languages
-					- (Note: trying to access variable names that are not at all in the file will still show as an error)
-			- Happens because the creation of the JavaScript Execution Context, (i.e. the area in the computer in which your code will be run) is actually created in two parts:
-				- Creation Phase
-					- Js syntax parser scans entire file and sets up memory space for all variables and functions listed in the file
-				- Execution Phase
+	- Resources
+		- JavaScript: Understanding the Weird Parts - https://www.udemy.com/course/understand-javascript/learn/lecture/2237442?start=150#content
+	- Hoisting
+		- Can access functions and variable names, (though all variable values are set to undefined) earlier in the code than they are actually declared
+			- Would be an error in other programming languages
+				- (Note: trying to access variable names that are not at all in the file will still show as an error)
+		- Happens because the creation of the Global Execution Context, (i.e. the environment in the computer in which your code will be run) is actually created in two parts:
+			- Creation Phase
+				- Js syntax parser scans entire file and sets up memory space for all variables and functions listed in the file
+			- Execution Phase
+				- JS uses single-threaded, synchronous, execution
+					- Executes js code, line-by-line, starting from the top
+						- Adds new function-specific Execution Contexts to the Stack, above the Global Execution Context, as each function is called
+							- With all of the elements of any other Execution Context
+								- Including its own specific "this" object, variable environment (i.e. memory location where variables are stored), etc
+							- Any other code is paused until the current function's Execution Context completes
+								- JS then removes, (/pops) the function-specific Execution Context from the Stack and continues single-threaded, synchronous execution of the code in the current file
+									- (Note: multiple function-specific Execution Contexts can be added to the Stack if the called function calls other functions during its execution)
+										- (these multiple function-specific Execution Contexts will be executed in a LIFO mode)
+											- (LIFO = Last In, First Out)
+												- (The last Execution Context added to the Stack is executed until it finishes, at which point it's popped off the Stack and is gone)
+													- (Then the second-to-last Execution Context added to the Stack is executed until it finishes, at which point it's popped off the Stack and is gone)
+														- (Until all function-specific Execution Contexts have been popped off the stack and we're back in the Global Execution Context)
+															- (At which point, execution continues to the next line of code in the file, in a single-threaded, synchronous fashion)
+	- Scope Chain
+		- JS uses where you type your code to determine where the (parent/) Outer Context, (/"Outer Lexical Environment") is for any variable at any point in your code
+			- (i.e. inside functions, in the Global Context Environment, etc)
+			- This is different than where the variable exists on the execution stack
+				- The Stack is 1-dimensional
+				- The Outer Context, (/"Outer Lexical Environment") is tree-based
+					- Where the tree starts at the code file's left margin, (the Global Execution Context)
+						- And moves to the right margin only via function definitions inside other function definitions
+					- i.e.	function b() {
+								console.log(myVar);
+							}
+
+							function a() {
+								var myVar = 2;
+								b();
+							}
+
+							var myVar = 1;
+							a();
+						- The Outer Context tree created is
+							- Level 1, (Parent of Level 2): Global Execution Context, (always the first parent)
+								- Level 2, (Child of Level 1): function b()
+									- The b() function definition is right on the left margin, (the Global Execution Context)
+										- So it will always be a direct child only of the Global Execution Context
+											- Regardless of wherever it's called, and thus, exists on the Stack.
+											- Thus, b()'s Outer Context is only its parent, the Level 1 Global Execution Context
+												- Since the Level 1 Global Execution Context has no parents
+								- Level 2, (Child of Level 1): function a()
+									- The a() function definition is right on the left margin, (the Global Execution Context)
+										- So it will always be a direct child only of the Global Execution Context
+											- Regardless of wherever it's called, and thus, exists on the Stack.
+											- Thus, a()'s Outer Context is only its parent, the Level 1 Global Execution Context
+												- Since the Level 1 Global Execution Context has no parents
+							- so, if JS couldn't find a given variable, (in this case, "myVar") in either Level 2 function, it would only look to the Level 1 (parent)
+								- i.e. the Global Execution Context
+									- And "console.log(myVar)" in b() would equal 1, its value in b()'s Level 1 parent.
+						- Even though the Stack would be
+							- b()   	// Level 2, with the Level 1 being its only parent / only other item in its Outer Context
+							- a()		// Level 2, with the Level 1 being its only parent / only other item in its Outer Context
+							- Global	// Always the Level 1
+					- If we modified the code to move b()'s function definition to inside a()'s function definition:
+						- i.e. we created a function definition one block to the right from the left margin, (/ Global Execution Context)
+							- 	function a() {
+									var myVar = 2;
+									function b() {
+										console.log(myVar);
+									}
+									b();
+								}
+
+								var myVar = 1;
+								a();
+							- The Outer Context tree created is
+								- Level 1, (Parent of Level 2): Global Execution Context, (always the first parent)
+									- Level 2, (Child of Level 1, Parent of Level 3): function a()
+										- Since function a() is still defined on the left margin, it still has the Global Execution Context as its only parent
+										- Level 3, (Child of Level 2): function b()
+											- Since function b() is now defined inside a()
+												- And thus one indent to the right of the left margin
+												- It is no longer a direct child of the Global Execution Context
+													- so, if JS couldn't find a given variable, (in this case, "myVar") in this Level 3 function definition,
+														- It would first look for the variable in its parent Level 2 function definition, (i.e. a() )
+															- And since a() defines myVar as 2:
+																- "console.log(myVar)" in b() would equal 2
+															- (Note: if, and only if, a() hadn't had a definition for myVar, JS would then move up the tree one more notch to a()'s parent, the Level 1 Global Execution Context)
+																(and "console.log(myVar)" would equal 1
+							- Even though the Stack wouldn't have changed, and would still be
+								- b()		// Now a Level 3, with a Level 2 parent, so both its Level 2 parent and that Level 2's Level 1 parent would be in its Outer Context, in that order
+								- a()		// Still a Level 2, with the Level 1 being its only parent / only other item in its Outer Context
+								- Global	// Always the Level 1
+	- "Asynchronous" Callbacks
+		- Since the js engine itself, (i.e. the (Execution) Stack) is single-threaded and synchronous
+		- Event Queue
+			- Similar to, but independent from, the (Execution) Stack
+			- Where the browser, (or Node) adds events, as they occur, (in order of occurrence)
+				- i.e. click events, HTTP requests, etc
+		- Event Loop
+			- Once JS has emptied its current (Execution) Stack, (LIFO)
+				- (Last In, First Out)
+				- Checks what's on the Event Queue for JS functions to be executed as a result of each event
+					- One item at a time, (FIFO)
+						- (First In, First Out)
+						- If no JS function, pops the event from the Event Queue and moves to the next one
+						- If there is a JS function associated with the event, processes on the Stack as usual
+							- (i.e. single-threaded, synchronous, LIFO)
+							- Once the (Execution) Stack for that function is complete
+								- JS again looks to the Event Queue for the next event to process
+		- Not really asynchronous, it's synchronous with two queues that it goes back and forth between
+			- As individual items complete
+				- So, event-based execution will still be blocked until the last event-based execution is completed.
