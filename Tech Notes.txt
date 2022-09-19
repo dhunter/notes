@@ -877,21 +877,26 @@
 						- let x   -> global
 						- const x -> global
 					- Block-level Scope - Function code blocks only
-						- NOTE: in Javascript, this version of scope is literally only inside a code block defined by the "function" keyword
+						- (i.e. inside a code block explicitly defined by the use of the "function" keyword only)
 						- var x   -> local
 						- let x   -> local
 						- const x -> local
 					- Block-level Scope - Other-than-Function code blocks
-						- Inside any other code block not defined by the "function" keyword
+						- (i.e. inside any code blocks NOT explicitly defined by the use of the "function" keyword)
 							- (i.e. if/else, for, do/while, etc)
-						- var x   -> global   // DING, DING, DING - who thought this was a good idea?  ;)
+						- var x   -> global   // CAUTION: this is unlike some other languages, which would expect local scope in this situation
 						- let x   -> local
 						- const x -> local
-				- For maximum similarity to other programming languages
-					- Where there is no distinction between JS' two Block-level scopes
-						- (i.e. scopes for function, if/else, for, do/while, etc are all treated the same)
-						- Always use "let" instead of "var"
+				- To minimize developer human-expectation bugs
+					- (i.e. bugs caused by developers expecting JS to behave similarly to other languages)
+						(- where there is no distinction between JS' two Block-level scope types)
+					- Use "let" instead of "var"
+						- Which effectively makes JS behave as a 2-scope language
 							- ("let" was specifically added to the language in ECMAScript 6 to address this issue)
+								- (Though expect to see the use of lots of "var"s in legacy, (and often, even new) code)
+									- (Since:
+										- ( a) "var" is still taught as the primary variable type in some places, and )
+										- ( b) "var" certainly _sounds_ more natural for a variable definition than "let" )
 			- Constants aren't real constants, (i.e. they aren't immutable)
 				- const [array name]
 					- You can't reassign [array name] entirely, (which is good)
@@ -902,8 +907,15 @@
 						- But you can change [value] of [key], (which is bad)
 					- You can actually make [object name] immutable after the const assignment
 						- By adding Object.freeze([object name])
-				- For maximum similarity to other languages, don't use "const" keyword if the array or object isn't really immutable
-					- I don't care what React generally uses - if a value isn't immutable, it's not a constant.  ;)
+				- To minimize developer human-expectation bugs
+					- (i.e. bugs caused by developers expecting JS to behave similarly to other languages)
+					- Don't use "const" keyword if the array or object isn't really immutable
+						- (Note: React likes to use "const" for mutable values)
+							- (So expect to see lots of mutable "const"s in React code)
+								- (Eventually, will have to look more into why React thinks they should be using "const")
+									- (Presuming there's an _incredibly_ strong reason to try messing with so basic a concept)
+										- (But, until someone convinces me that pi or e or K have actually always been mutable variables)
+											- (I, at least, will be sticking to the idea that all constants, and keywords used to refer to them, must actually be... constant...  i.e. immutable)
 			- Unenforced Elements 
 				- ";" usage at end-of-lines not enforced
 					- Can often either include an end-of-line semi-colon, or not, with no demonstrable effect on code function either way
@@ -2411,7 +2423,7 @@
 								- b()		// Now a Level 3, with a Level 2 parent, so both its Level 2 parent and that Level 2's Level 1 parent would be in its Outer Context, in that order
 								- a()		// Still a Level 2, with the Level 1 being its only parent / only other item in its Outer Context
 								- Global	// Always the Level 1
-	- "Asynchronous" Callbacks
+	- "Asynchronous" Execution, (/ Callbacks)
 		- Since the js engine itself, (i.e. the (Execution) Stack) is single-threaded and synchronous
 		- Event Queue
 			- Similar to, but independent from, the (Execution) Stack
@@ -2431,3 +2443,85 @@
 		- Not really asynchronous, it's synchronous with two queues that it goes back and forth between
 			- As individual items complete
 				- So, event-based execution will still be blocked until the last event-based execution is completed.
+	- Operators
+		- Order of Operations
+			- Operator Precedence
+				- PEMDAS+, (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence#table)
+					- (Precedence goes from highest number to lowest in the table)
+			- Operator Associativity
+				- When operators have the same precedence
+					- Determines whether they should be evaluated Left-to-Right or Right-to-Left
+						- For normal math, makes no difference, (i.e. PEMDAS)
+							- But does for other operators in the table, including "=", which is used for assignment, not equality
+								- i.e. 	let a = 2, b = 3, c = 4;
+
+										a = b = c;
+
+										console.log(a);
+										console.log(b);
+										console.log(c);
+								- All identical operators, and thus identical precedence
+									- But Assignment is Right-to-Left associative, (see table)
+										- So we start from the rightmost value in the line, (i.e. c)
+											- Assign the value in c, (i.e. 4) to b, (which changes from 3 to 4)
+											- Then assign the value of b and c, (which are now both equal to 4) to a, (which changes from 2 to 4)
+											- So the final state is that all three variables now equal 4.
+												- (If assignment has instead been left-to-right associative)
+													- (We would have started with the value of a - i.e. 2, and then pushed that value to b and then to c)
+														- (Which would have created a final state where all three variables were equal to 2)
+			- (Note: since all operators are functions in JS, they have return values that are the result of the operation)
+				(i.e. in the "a = b = c;" example above)
+					(When b is first assigned the value of c, the "=" operator has a return value of 4)
+		- Coercion
+			- Implicit
+				- When a given operator is defined as having more than one way of operating
+					- Dependent on the type of values submitted to it
+						- i.e. "+"
+							- For Number type values, performs addition
+							- For String type values, performs concatenation
+								- (i.e. just pushing the two strings together)
+				- And values of differently-operating types are submitted to it
+					- (i.e. where each type has a defined operation)
+					- i.e. 	let a = 1 + '2';	
+				- JS will try to pretend that both arguments are of the same Type
+					- And will thus use that way of operating
+						- i.e. 	In the case of let a = 1 + '2';
+							- (i.e. trying to combine a Number type with a String type)
+								- (where both types have valid definitions for that operator)
+							- JS will "pretend" that the type of one of the arguments is the same as the other
+								- And will then use that operator definition to evaluate the line
+									- (In this case, JS will pretend that the Number 1 is, instead, the String '1')
+										- (and will thus concatenate '1' and '2')
+											- (Returning the String '12')
+				- (Note: This is a truly fabulous way of creating unintended bugs)
+					- (Especially since JS' rules as to how it chooses to implicitly coerce types are obtuse, at best)
+						- (https://www.freecodecamp.org/news/js-type-coercion-explained-27ba3d9a2839/)
+					- (So, if you really have to combine values of different types in any way)
+						- (Use Explicit Coercion / Type Casting, below)
+							- (Either temporarily, for a given function only)
+								- (i.e. let a = 1 + Number('2');
+								- (Or, much better, to formally alter / create variables with the desired type)
+									- (i.e.  let b = Number('2'); )
+								- And then operate as originally intended, using the correctly-typed version of the variable
+									- (i.e.  let a = 1 + b; )
+										- (Which will always return the Number 3)
+				- (Note: If, when evaluating equality,)
+					- (You use the strict equality operator - "===")
+						- (Instead of the loose equality operator - "==")
+							- (JS will not use implicit coercion)
+								- (Which is a good thing, so use "===")
+			- Explicit, (/ Type Casting)
+				- Using keywords to actively alter what type a given value returns
+					- i.e.	let a = 1 + number('2');
+						- Forces JS to evaluate the String '2' as the Number 2
+							- Returning the Number 3
+								- (Rather than using its implicit preference, shown above)
+									- (i.e. to evaluate the Number 1 as the String '1')
+										- (And thus to return the String '12')
+					- Note: this doesn't actually change the type of the value in question
+						- (i.e. The type of '2', or any such variable with a type of String remains String)
+							- (All you're doing by virtue of number('2') or number([other variable with a type of String])  )
+								- (Is telling JS that for purposes of whatever operation you're trying on that String)
+									- (in this case, "+" )
+										- ("pretend" that the value is of the type you specifically set, in this case, Number)
+											- (And then evaluate the line while it "pretends" what you told it to)
