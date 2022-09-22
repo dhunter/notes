@@ -2536,16 +2536,16 @@
 						- (Use Explicit Coercion / Type Casting, below)
 							- (Either temporarily, for a given function only)
 								- (i.e. let a = 1 + Number('2');
-								- (Or, much better, to formally alter / create variables with the desired type)
-									- (i.e.  let b = Number('2'); )
-								- And then operate as originally intended, using the correctly-typed version of the variable
-									- (i.e.  let a = 1 + b; )
-										- (Which will always return the Number 3)
-				- (Note: If, when evaluating equality,)
-					- (You use the strict equality operator - "===")
-						- (Instead of the loose equality operator - "==")
+							- (Or, much better, to formally alter / create variables with the desired type)
+								- (i.e.  let b = Number('2'); )
+							- (And then operate as originally intended, using the correctly-typed version of the variable)
+								- (i.e.  let a = 1 + b; )
+									- (Which will always return the Number 3)
+				- (Note: If, when evaluating equality/inequality)
+					- (You use the strict equality/inequality operators - "===" / "!==")
+						- (Instead of the loose equality/inequality operators - "==" / "!=")
 							- (JS will not use implicit coercion)
-								- (Which is a good thing, so use "===")
+								- (Which is a good thing, so use "===" / "!==")
 			- Explicit, (/ Type Casting)
 				- Using keywords to actively alter what type a given value returns
 					- i.e.	let a = 1 + number('2');
@@ -2561,6 +2561,48 @@
 									- (in this case, "+" )
 										- ("pretend" that the value is of the type you specifically set, in this case, Number)
 											- (And then evaluate the line while it "pretends" what you told it to)
+		- Comparison Operators
+			- Since JS implicitly coerces values whenever it receives a type it wasn't expecting
+				- You can often end up with comparisons returning logically incorrect results
+					- i.e. 	console.log(1 < 2 < 3);
+						- Logically, that is true, so would expect it to return a Boolean true
+							- Which it does
+					- However, console.log(3 < 2 < 1);
+						- Is logically false, so would expect it to return a Boolean false
+							- Unfortunately, it returns a Boolean true, due to coercion
+								- i.e. Since the "<" operator is left associative
+									- JS first evaluates "3 < 2" which is false
+										- Then it subs that false in for "3 < 2"
+											- Next evaluating "false < 1"
+												- Since its now trying to compare a Boolean with a Number
+													- It coerces the Boolean false into Number(false)
+														- Which is 0
+															- So then evaluates
+																- "0 < 1" which is true, so it returns Boolean true
+																	- Even though, logically, every element of the original statement, (i.e. "3 < 2 < 1") is false
+					- Now that we've looked at the trainwreck of why "3 < 2 < 1" is, in JS' mind, true
+						- Looking back at "1 < 2 < 3"
+							- JS is evaluating "1 < 2" which is true, returns Boolean true
+								- Next it evaluates "Number(true) < 3"
+									- Number(true) = 1
+										- So it evaluates is "1 < 3" which is true, returns Boolean true
+							- We can see that "1 < 2 < 3" has the same programmatic problems as "3 < 2 < 1"
+								- With trying to compare arguments of different types and thus using implicit coercion
+									- And that the way that it's solving the problem is still, logically, entirely incorrect
+										- It just happens to be that JS' incorrect processing arrives at same answer as correct logical processing would give
+			- To avoid this chaos
+				- Avoid using more than one comparison operator in the same statement
+				- Use explicit coercion / type casting anywhere the type(s) of arguments passed to your function haven't been programmatically guaranteed
+					- Always safest just to explicitly coerce
+					- And make sure that the explicit coercion you're using actually yields the result you're expecting
+						- Since
+							- 		Number(undefined) = NaN  // "Not a Number"
+							- but 	Number(null) = 0
+						- And
+							- "null == 0" and "null === 0" are both false
+							- While the explicitly coerced versions of those statements
+								- "Number(null) == 0" and "Number(null) === 0" both evaluate to true
+
 
 
 
