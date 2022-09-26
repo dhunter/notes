@@ -871,33 +871,6 @@
 				- i.e.	"const fruits = ["Apple", ...citrus, "Banana", "Grapefruit"]"
 							- Yields fruits = ["Apple", "Lime", "Lemon", "Orange", "Banana", "Grapefruit"]
 		- Javascript Quirks
-			- Scope
-				- Javascript has 3 concepts of scope, instead of the more common 2:
-					- Global Scope, (available everywhere)
-						- var x   -> global
-						- let x   -> global
-						- const x -> global
-					- Block-level Scope - Function code blocks only
-						- (i.e. inside a code block explicitly defined by the use of the "function" keyword only)
-						- var x   -> local
-						- let x   -> local
-						- const x -> local
-					- Block-level Scope - Other-than-Function code blocks
-						- (i.e. inside any code blocks NOT explicitly defined by the use of the "function" keyword)
-							- (i.e. if/else, for, do/while, etc)
-						- var x   -> global   // CAUTION: this is unlike some other languages, which would expect local scope in this situation
-						- let x   -> local
-						- const x -> local
-				- To minimize developer human-expectation bugs
-					- (i.e. bugs caused by developers expecting JS to behave similarly to other languages)
-						(- where there is no distinction between JS' two Block-level scope types)
-					- Use "let" instead of "var"
-						- Which effectively makes JS behave as a 2-scope language
-							- ("let" was specifically added to the language in ECMAScript 6 to address this issue)
-								- (Though expect to see the use of lots of "var"s in legacy, (and often, even new) code)
-									- (Since:
-										- ( a) "var" is still taught as the primary variable type in some places, and )
-										- ( b) "var" certainly _sounds_ more natural for a variable definition than "let" )
 			- Constants aren't real constants, (i.e. they aren't immutable)
 				- const [array name]
 					- You can't reassign [array name] entirely, (which is good)
@@ -917,6 +890,33 @@
 									- (Presuming there's an _incredibly_ strong reason to try messing with so basic a concept)
 										- (But, until someone convinces me that pi or e or K have actually always been mutable variables)
 											- (I, at least, will be sticking to the idea that all constants, and keywords used to refer to them, must actually be... constant...  i.e. immutable)
+			- Scope
+				- Javascript has three concepts of scope, instead of two:
+					- Global Scope, (available everywhere)
+						- var x   -> global
+						- let x   -> global
+						- const x -> global
+					- Block-level Scope - Function code blocks only
+						- (i.e. inside a code block explicitly defined by the use of the "function" keyword only)
+						- var x   -> local
+						- let x   -> local
+						- const x -> local
+					- Block-level Scope - Other-than-Function code blocks
+						- (i.e. inside any code blocks NOT explicitly defined by the use of the "function" keyword)
+							- (i.e. if/else, for, do/while, etc)
+						- var x   -> global   // CAUTION: this is unlike some other languages, which would expect local scope in this situation
+						- let x   -> local
+						- const x -> local
+				- To minimize developer human-expectation bugs
+					- (i.e. bugs caused by developers expecting JS to behave similarly to other languages)
+						(- where there is no distinction between JS' two Block-level scope types)
+					- Use "let" instead of "var"
+						- Which effectively makes JS behave as a two-scope language
+							- ("let" was specifically added to the language in ECMAScript 6 to address this issue)
+								- (Though expect to see the use of lots of "var"s in legacy, (and often, even new) code)
+									- (Since:
+										- ( a) "var" is still taught as the primary variable type in some places, and )
+										- ( b) "var" certainly _sounds_ more natural for a variable definition than "let" )
 			- Unenforced Elements 
 				- ";" usage at end-of-lines not enforced
 					- Can often either include an end-of-line semi-colon, or not, with no demonstrable effect on code function either way
@@ -2602,6 +2602,47 @@
 							- "null == 0" and "null === 0" are both false
 							- While the explicitly coerced versions of those statements
 								- "Number(null) == 0" and "Number(null) === 0" both evaluate to true
+	- Objects and Functions
+		- Objects can contain
+			- Primitives - i.e. "person.firstName"
+			- Other Objects - i.e. "person.address"
+				- Where person.address has been created as an object that exists inside the person object
+			- Methods - i.e. functions / "person.create"
+				- Where person.create has been created as a function that exists inside the person object
+			- (In the computer's memory)
+				- (An object is an area in memory - i.e. 0x001)
+					- (That contains references to other areas in memory for each of the above, when defined)
+						(i.e. Primitives - i.e. 0x002, Other Objects - i.e. 0x003, and Methods - 0x004)
+							- (Note: Each Primitive / Other Object / Method, once defined, will have its own memory location)
+		- Created by:
+			- let [object_name] = new Object();
+			- let [object_name] = {};  // Called an Object Literal
+				- (Preferred way of creating an object)
+				- Can define properties, (and, as with functions) with default values, as part of the object definition
+					- i.e. 	let person = { 
+								firstName: "John",
+								lastName: "Smith",
+								address: {
+									street: "123 Main St",
+									city: "Anycity",
+									state: 'CA'
+								}
+							};
+						- Which can then be accessed as person.firstName, person.lastName, or person.address.street
+							- (Or person['firstName'], person['lastName'] or person['address']['street'])
+								- (Though using dot notation - i.e. person.firstName - is preferred)
+				- Can use Object Literal to define a new object during a function call
+					- i.e. 	Directly below the person object definition below, we define a function to make use of that object
+						- 	function greet(person) {
+								console.log("Hi " + person.firstName);  // Outputs "Hi John", using default values
+							}
+						- And can then pass an object, using an object literal 
+							- i.e.	greet({
+										firstName: "Mary",
+										lastName: "Doe"
+									});  // Outputs "Hi Mary", since a new object, with a new firstName and lastName, was created the moment the function call was made
+
+								
 
 
 
