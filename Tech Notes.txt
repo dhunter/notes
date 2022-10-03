@@ -870,26 +870,29 @@
 			- Can be placed at any location inside another array, (/ object, but objects don't use indices, so more for style than usefulness)
 				- i.e.	"const fruits = ["Apple", ...citrus, "Banana", "Grapefruit"]"
 							- Yields fruits = ["Apple", "Lime", "Lemon", "Orange", "Banana", "Grapefruit"]
-		- Javascript Quirks
-			- Constants aren't real constants, (i.e. they aren't immutable)
-				- const [array name]
-					- You can't reassign [array name] entirely, (which is good)
-						- But you can still push items into it, (which is bad)
-				- const [object name] = {[key], [value]}
-					- You can't reassign [object name] entirely, (which is good)
-					- You can't overwrite the name of [key], (which is good)
-						- But you can change [value] of [key], (which is bad)
-					- You can actually make [object name] immutable after the const assignment
-						- By adding Object.freeze([object name])
-				- To minimize developer human-expectation bugs
-					- (i.e. bugs caused by developers expecting JS to behave similarly to other languages)
-					- Don't use "const" keyword if the array or object isn't really immutable
-						- (Note: React likes to use "const" for mutable values)
-							- (So expect to see lots of mutable "const"s in React code)
-								- (Eventually, will have to look more into why React thinks they should be using "const")
-									- (Presuming there's an _incredibly_ strong reason to try messing with so basic a concept)
-										- (But, until someone convinces me that pi or e or K have actually always been mutable variables)
-											- (I, at least, will be sticking to the idea that all constants, and keywords used to refer to them, must actually be... constant...  i.e. immutable)
+		- Javascript Quirks / Things to Remember
+			- Arrays
+				- Can't use negative indexes
+			- Constants
+				- Constants aren't real constants, (i.e. they aren't immutable)
+					- const [array name]
+						- You can't reassign [array name] entirely, (which is good)
+							- But you can still push items into it, (which is bad)
+					- const [object name] = {[key], [value]}
+						- You can't reassign [object name] entirely, (which is good)
+						- You can't overwrite the name of [key], (which is good)
+							- But you can change [value] of [key], (which is bad)
+						- You can actually make [object name] immutable after the const assignment
+							- By adding Object.freeze([object name])
+					- To minimize developer human-expectation bugs
+						- (i.e. bugs caused by developers expecting JS to behave similarly to other languages)
+						- Don't use "const" keyword if the array or object isn't really immutable
+							- (Note: React likes to use "const" for mutable values)
+								- (So expect to see lots of mutable "const"s in React code)
+									- (Eventually, will have to look more into why React thinks they should be using "const")
+										- (Presuming there's an _incredibly_ strong reason to try messing with so basic a concept)
+											- (But, until someone convinces me that pi or e or K have actually always been mutable variables)
+												- (I, at least, will be sticking to the idea that all constants, and keywords used to refer to them, must actually be... constant...  i.e. immutable)
 			- Scope
 				- Javascript has three concepts of scope, instead of two:
 					- Global Scope, (available everywhere)
@@ -2374,6 +2377,20 @@
 		- Happens because the creation of the Global Execution Context, (i.e. the environment in the computer in which your code will be run) is actually created in two parts:
 			- Creation Phase
 				- Js syntax parser scans entire file and sets up memory space for all variables and functions listed in the file
+					- Note: functions written as function statements, (i.e. functions that do NOT return a value) do get hoisted
+						- So these type of functions are available before the function declarations
+						- i.e. 	greet();   // Yields "Hi" in the console.
+
+								function greet() {  // Function Statement, (does NOT return a value) so is hoisted
+									console.log("Hi");
+								}
+					- However, if you write functions as function expressions, (i.e. functions that do return a value) these are really just variables, so do NOT get hoisted
+						- And are thus not available before the function declarations
+						- i.e. 	anonymousGreet();  // Yields "undefined is not a function" in the console
+
+								let anonymousGreet = function() {  // Function Expression, (does return a value - i.e. the object) so is NOT hoisted
+									console.log("Hi");
+								}
 			- Execution Phase
 				- JS uses single-threaded, synchronous, execution
 					- Executes js code, line-by-line, starting from the top
@@ -2389,6 +2406,10 @@
 													- (Then the second-to-last Execution Context added to the Stack is executed until it finishes, at which point it's popped off the Stack and is gone)
 														- (Until all function-specific Execution Contexts have been popped off the stack and we're back in the Global Execution Context)
 															- (At which point, execution continues to the next line of code in the file, in a single-threaded, synchronous fashion)
+		- (Note: for good coding, don't rely on this)
+			- (Declare your functions first, then invoke them, as you would in any other language)
+				- (And take hoisting as just a random weirdness of JS)
+					- (Not as something for your code to actually depend on)
 	- Scope Chain
 		- JS uses where you type your code to determine where the (parent/) Outer Context, (/"Outer Lexical Environment") is for any variable at any point in your code
 			- (i.e. inside functions, in the Global Context Environment, etc)
@@ -2603,7 +2624,7 @@
 							- While the explicitly coerced versions of those statements
 								- "Number(null) == 0" and "Number(null) === 0" both evaluate to true
 	- Objects and Functions
-		- Objects can contain
+		- Can contain
 			- Primitives - i.e. "person.firstName"
 			- Other Objects - i.e. "person.address"
 				- Where person.address has been created as an object that exists inside the person object
@@ -2641,6 +2662,34 @@
 										firstName: "Mary",
 										lastName: "Doe"
 									});  // Outputs "Hi Mary", since a new object, with a new firstName and lastName, was created the moment the function call was made
+		- Object Literals vs JSON, (_J_ava_S_cript _O_bject _N_otation)
+			- JSON is a subset of valid object literal syntax
+				- JSON: Property names need to be inside quotes
+					- Object Literal property names _can be_ inside quotes
+						- But there is no requirement for them to be so
+			- Conversions
+				- Object literal to JSON --> JSON.stringify([object literal]);
+				- JSON to object literal --> JSON.parse([json string]);
+		- Functions
+			- JS functions are:
+				- Just a (special) type of object
+					- So, just as with any other object, can attach:
+						- Primitives
+						- Other Objects
+						- Methods
+					- Also has:
+						- A Name property
+							- Optional, can be anonymous
+						- A Code property
+							- (Which is invocable / callable)
+								- (When you add parentheses to the name property)
+							- Which contains the code of the function
+								- (Note: the code of the function is not actually the function itself)
+									- (The code is just a property of the function object)
+				- First Class Functions
+					- Can assign to variables
+					- Pass around as arguments
+					- Create on the fly
 
 								
 
