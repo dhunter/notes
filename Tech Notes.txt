@@ -871,8 +871,31 @@
 				- i.e.	"const fruits = ["Apple", ...citrus, "Banana", "Grapefruit"]"
 							- Yields fruits = ["Apple", "Lime", "Lemon", "Orange", "Banana", "Grapefruit"]
 		- Javascript Quirks / Things to Remember
-			- Arrays
-				- Can't use negative indexes
+			- Assignments By Value vs By Reference
+				- Cannot control how you want the assignment to occur
+				- By Value
+					- (i.e. a copy of the value of the assignment is made in a new location in memory)
+						- (After the initial assignment, the two values are entirely independent)
+					- All primitives
+						- i.e. 	let a = 3; // i.e. a variable created at memory location 0x001
+								let b;
+
+								b = a;  // a = 3 @ memory location 0x001, b = 3 copied to memory location 0x002
+								a = 2;  // a = 2, b = 3 since the two variables point to different memory locations, and are thus entirely independent.
+				- By Reference
+					- (i.e. instead of a copy, the assignment adds a pointer to the original memory location)
+						- (After the initial assignemnt, the two values the same, since they're both pointing at the same memory location)
+					- All Objects, including Functions
+						- (Since js functions are just objects)
+						- i.e. 	let a = { greeting: 'hi' };  // i.e. an object created at memory location 0x001
+								let b;
+
+								b = a;  // a.greeting = 'hi' @ memory location 0x001, b.greeting = 'hi', just given a pointer to memory location 0x001
+								a.greeting = 'hello';  // a.greeting = 'hello', b.greeting = 'hello', since the two values are just aliases for the same memory location
+						- However, later assignments that don't point to objects already in memory will, (/have to) be done By Value, overriding any prior By Reference relationship that might have existed
+							- That is, if, after the prior lines, the below is added:
+
+								b = { greeting: 'howdy' };  // a.greeting = 'hello', b.greeting = 'howdy' since this later object being assigned, i.e. { greeting: 'howdy' },  didn't point to an object already in memory, so js assigned a new memory space to put that value into, and then pointed b there.
 			- Constants
 				- Constants aren't real constants, (i.e. they aren't immutable)
 					- const [array name]
@@ -920,6 +943,47 @@
 									- (Since:
 										- ( a) "var" is still taught as the primary variable type in some places, and )
 										- ( b) "var" certainly _sounds_ more natural for a variable definition than "let" )
+						- Note: Some really old browsers, (older than ~7 years ago) don't work with ES6, so you'll be stuck with var, instead of let
+							- But, at 10/2022, that's less than 4% of all users for full ES6 support
+								- (< 2% for partial support)
+			- "This" keyword
+				- Is supposed to refer to the most local Execution Context where it's invoked
+					- i.e. If invoked not inside an object, it refers to the Global Execution Context
+						- If invoked inside an object, it should refer to that object
+							- However, if invoked via a function inside a function, (i.e. an object method definition) it will ignore the local object and instead interact with the Global Execution Context
+								- i.e. 	let a = {
+											name: 'This is my object',
+											log: function() {
+												this.name = 'Changed my object';  // Correctly sets a.name to 'Changed my object'
+												console.log(this);  
+
+												let set_name = function(new_name) {
+													this.name = new_name;
+												}
+
+												set_name('Changed object again');  // Incorrectly doesn't affect a.name at all, so a.name remains 'Changed my object', but instead adds a .name property to the Global Execution Context and sets it to 'Changed object again'
+												console.log(this);  
+											}
+										}
+				- To deal with
+					- Assign "this" (By Reference, since it's an object) to another object
+						- Then only use that other object
+							- i.e. 	let a = {
+										name: 'This is my object',
+										log: function() {
+											let self = this;  // The workaround
+
+											self.name = 'Changed my object';  // Correctly sets a.name to 'Changed my object'
+											console.log(self);  
+
+											let set_name = function(new_name) {
+												self.name = new_name;
+											}
+
+											set_name('Changed object again');  // Now, correctly sets a.name to 'Changed object again'
+											console.log(self);  
+										}
+									}
 			- Unenforced Elements 
 				- ";" usage at end-of-lines not enforced
 					- Can often either include an end-of-line semi-colon, or not, with no demonstrable effect on code function either way
@@ -2395,8 +2459,10 @@
 				- JS uses single-threaded, synchronous, execution
 					- Executes js code, line-by-line, starting from the top
 						- Adds new function-specific Execution Contexts to the Stack, above the Global Execution Context, as each function is called
-							- With all of the elements of any other Execution Context
-								- Including its own specific "this" object, variable environment (i.e. memory location where variables are stored), etc
+							- With each Execution Context, (including Global) having its own:
+								- Variable Environment, (i.e. memory location where variables are stored)
+								- Outer Environment (i.e. tree of all parent execution contexts - see "Scope Chain" below)
+								- "this" keyword
 							- Any other code is paused until the current function's Execution Context completes
 								- JS then removes, (/pops) the function-specific Execution Context from the Stack and continues single-threaded, synchronous execution of the code in the current file
 									- (Note: multiple function-specific Execution Contexts can be added to the Stack if the called function calls other functions during its execution)
